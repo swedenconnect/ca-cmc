@@ -120,7 +120,7 @@ public class CMCClient {
     return getCMCResponse(cmcRequest);
   }
 
-  public CMCResponse listCertificatesRequest(int pageSize, int pageIndex, SortBy sortBy, boolean notRevoked) throws IOException {
+  public CMCResponse listCertificatesRequest(int pageSize, int pageIndex, SortBy sortBy, boolean notRevoked, boolean descending) throws IOException {
     final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
       .adminRequestType(AdminRequestType.listCerts)
       .data(OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
@@ -128,9 +128,23 @@ public class CMCClient {
         .pageIndex(pageIndex)
         .sortBy(sortBy)
         .notRevoked(notRevoked)
+          .descending(descending)
         .build()))
       .build()));
     return getCMCResponse(cmcRequest);
+  }
+
+  /**
+   * Legacy request where the descending option is set to false.
+   * @param pageSize the number of items to return, if available
+   * @param pageIndex the index of the page
+   * @param sortBy the item to sort by
+   * @param notRevoked true if only non revoked items are returned
+   * @return CMCResponse
+   * @throws IOException on error processing the request
+   */
+  public CMCResponse listCertificatesRequest(int pageSize, int pageIndex, SortBy sortBy, boolean notRevoked) throws IOException {
+    return listCertificatesRequest(pageSize, pageIndex, sortBy, notRevoked, false);
   }
 
   /**

@@ -84,7 +84,8 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
       listCertsReqeust.getPageIndex(),
       listCertsReqeust.getPageSize(),
       listCertsReqeust.isNotRevoked(),
-      listCertsReqeust.getSortBy()
+      listCertsReqeust.getSortBy(),
+      listCertsReqeust.isDescending()
     );
 
     List<CertificateData> certificateDataList = new ArrayList<>();

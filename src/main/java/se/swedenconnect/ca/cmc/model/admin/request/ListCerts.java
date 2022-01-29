@@ -42,5 +42,7 @@ public class ListCerts {
   private int pageSize;
   /** The index of the page of certificates to return */
   private int pageIndex;
+  /** The sort direction. Set to true to list the last item first */
+  private boolean descending;
 
 }
