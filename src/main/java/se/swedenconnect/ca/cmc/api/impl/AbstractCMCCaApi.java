@@ -187,6 +187,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
 
         try {
           caService.revokeCertificate(serialNumber, reason, revokeDate);
+          caService.publishNewCrl();
         } catch (Exception ex2) {
           throw new CMCCaApiException(ex2.getMessage(), ex2, Arrays.asList(revokeBodyPartId), CMCFailType.badCertId);
         }
