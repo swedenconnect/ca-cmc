@@ -26,7 +26,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import se.idsec.sigval.cert.chain.ExtendedCertPathValidatorException;
+import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
 import se.swedenconnect.ca.cmc.api.*;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;

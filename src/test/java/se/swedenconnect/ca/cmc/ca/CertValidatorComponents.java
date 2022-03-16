@@ -18,8 +18,8 @@ package se.swedenconnect.ca.cmc.ca;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import se.idsec.sigval.cert.chain.impl.StatusCheckingCertificateValidatorImpl;
-import se.idsec.sigval.cert.validity.crl.CRLCache;
+import se.swedenconnect.sigval.cert.chain.impl.StatusCheckingCertificateValidatorImpl;
+import se.swedenconnect.sigval.cert.validity.crl.CRLCache;
 
 /**
  * Components of a certificate validator used for test
