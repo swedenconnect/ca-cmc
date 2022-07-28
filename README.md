@@ -1,4 +1,11 @@
+![Logo](https://raw.githubusercontent.com/swedenconnect/technical-framework/master/img/sweden-connect.png)
+
 # CMC API for Certification Authority integration
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-cmc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-cmc)
+
+Core functions for managing a remote CA via CMC
+
 ____
 
 This is an implementation of a CMC API for the CA engine with a narrowed scope to provide the essential functions of the CA via an open restful API.
@@ -23,22 +30,21 @@ the cmcSequence and the otherMsgSequence in both requests and responses are alwa
 
 The following control attributes are used in requests:
 
-Control attribute | Usage | Presence
----|---|---
-senderNonce  | A unique byte array value  | SHALL be present in all requests
-regInfo  | Carry implementation specific data for each request type  | Conditional on request type
-getCert  | Used only in requests to get a specific certificate  | SHALL be present in getCert requests and SHALL NOT be present in any other request
-lraPOPWitness  | Used with CRMF certificate requests  |  SHALL be present when CRMF certificate request format is used
-revokeRequest  | Used only in requests to revoke a certificate  | SHALL be present in revoke requests and SHALL NOT be present in any other request
-
+| Control attribute | Usage                                                    | Presence                                                                           |
+|-------------------|----------------------------------------------------------|------------------------------------------------------------------------------------|
+| senderNonce       | A unique byte array value                                | SHALL be present in all requests                                                   |
+| regInfo           | Carry implementation specific data for each request type | Conditional on request type                                                        |
+| getCert           | Used only in requests to get a specific certificate      | SHALL be present in getCert requests and SHALL NOT be present in any other request |
+| lraPOPWitness     | Used with CRMF certificate requests                      | SHALL be present when CRMF certificate request format is used                      |
+| revokeRequest     | Used only in requests to revoke a certificate            | SHALL be present in revoke requests and SHALL NOT be present in any other request  |
 
 The following control attributes are used in responses:
 
-Control attribute | Usage | Presence
----|---|---
-recipientNonce  | The nonce value of the corresponding request  | SHALL be present in all responses
-responseInfo  | Carry implementation specific data for each request type  | Conditional on request type
-statusInfoV2  | Status information of the response  | SHALL be present in all responses
+| Control attribute | Usage                                                    | Presence                          |
+|-------------------|----------------------------------------------------------|-----------------------------------|
+| recipientNonce    | The nonce value of the corresponding request             | SHALL be present in all responses |
+| responseInfo      | Carry implementation specific data for each request type | Conditional on request type       |
+| statusInfoV2      | Status information of the response                       | SHALL be present in all responses |
 
 All control attributes above are defined in RFC 5272.
 
@@ -102,12 +108,11 @@ The data string holds another JSON string that contains the JSON serialization o
 
 The following table illustrate what data objects that are passed as request and response database
 
-AdminRequestType | Request data | Response data
----|---|---
-caInfo  |  absent |  se.swedenconnect.ca.cmc.model.admin.response.CAInformation
-listCerts  |  se.swedenconnect.ca.cmc.model.admin.request.ListCerts | List&lt;se.swedenconnect.ca.cmc.model.admin.response.CertificateData>
-allCertSerials  | absent  | List&lt;String> (Serialnumbers as hex strings)
-
+| AdminRequestType | Request data                                          | Response data                                                         |
+|------------------|-------------------------------------------------------|-----------------------------------------------------------------------|
+| caInfo           | absent                                                | se.swedenconnect.ca.cmc.model.admin.response.CAInformation            |
+| listCerts        | se.swedenconnect.ca.cmc.model.admin.request.ListCerts | List&lt;se.swedenconnect.ca.cmc.model.admin.response.CertificateData> |
+| allCertSerials   | absent                                                | List&lt;String> (Serialnumbers as hex strings)                        |
 
 ## CMC API
 
