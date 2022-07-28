@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import lombok.Getter;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
 import java.security.KeyPair;
-
 /**
  * Enumeration of configuration data for test CA providers
  *

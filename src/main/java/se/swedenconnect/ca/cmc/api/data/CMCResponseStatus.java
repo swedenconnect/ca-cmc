@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.data;
 
 import lombok.AllArgsConstructor;
@@ -38,11 +37,6 @@ import java.util.List;
 @Builder
 public class CMCResponseStatus {
 
-  public CMCResponseStatus(CMCStatusType status, List<BodyPartID> bodyPartIDList) {
-    this.status = status;
-    this.bodyPartIDList = bodyPartIDList;
-  }
-
   /** The major status indicating success or failure */
   private CMCStatusType status;
   /** Detailed failure information as provided by {@link CMCFailType} */
@@ -51,5 +45,16 @@ public class CMCResponseStatus {
   private String message;
   /** List of request control message body part ID:s that was processed in the request to obtain the response */
   private List<BodyPartID> bodyPartIDList;
+
+  /**
+   * Constructor
+   *
+   * @param status status type indication
+   * @param bodyPartIDList list of BodyPartID of controls that caused the status indication
+   */
+  public CMCResponseStatus(CMCStatusType status, List<BodyPartID> bodyPartIDList) {
+    this.status = status;
+    this.bodyPartIDList = bodyPartIDList;
+  }
 
 }

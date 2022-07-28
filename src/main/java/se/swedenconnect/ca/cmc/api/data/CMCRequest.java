@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.data;
 
 import lombok.*;
@@ -51,5 +50,10 @@ public class CMCRequest {
   private BodyPartID certReqBodyPartId;
   /** The PKIData structure of this CMC request */
   private PKIData pkiData;
+
+  /**
+   * Dummy declaration of lombok generated builder to keep javadoc testing happy
+   */
+  public static class CMCRequestBuilder {}
 
 }

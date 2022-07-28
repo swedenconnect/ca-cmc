@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.client;
 
-import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -29,11 +27,13 @@ public interface CMCClientHttpConnector {
 
   /**
    * Sending a request to a CA and getting a CMC response back or relevant error data
+   *
    * @param cmcRequestBytes CMC request data
    * @param requestUrl URL used to send the request
+   * @param connectTimeout the timeout for http connect specified in milliseconds
+   * @param readTimeout the timeout for reading http data specified in milliseconds
    * @return response data
-   * @throws IOException
    */
-  CMCHttpResponseData sendCmcRequest(byte[] cmcRequestBytes, URL requestUrl, int connectTimeout, int readTimeout);
+  CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl, final int connectTimeout, final int readTimeout);
 
 }

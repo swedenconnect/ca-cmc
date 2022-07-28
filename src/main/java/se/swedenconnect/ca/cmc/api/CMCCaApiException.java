@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api;
 
 import lombok.Getter;
@@ -33,17 +32,34 @@ import java.util.List;
  */
 public class CMCCaApiException extends IOException {
 
+  private static final long serialVersionUID = -887662559964395201L;
+
   /** List of BodyPartID of CMC objects that was processed when the failure occurred */
   @Getter private final List<BodyPartID> failingBodyPartIds;
   /** CMC failure type */
   @Getter private final CMCFailType cmcFailType;
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param failingBodyPartIds failing body part IDs
+   * @param cmcFailType cmc fail type
+   */
   public CMCCaApiException(String message, List<BodyPartID> failingBodyPartIds, CMCFailType cmcFailType) {
     super(message);
     this.failingBodyPartIds = failingBodyPartIds;
     this.cmcFailType = cmcFailType;
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param failingBodyPartIds failing body part IDs
+   * @param cmcFailType cmc fail type
+   */
   public CMCCaApiException(String message, Throwable cause, List<BodyPartID> failingBodyPartIds,
     CMCFailType cmcFailType) {
     super(message, cause);
@@ -51,6 +67,13 @@ public class CMCCaApiException extends IOException {
     this.cmcFailType = cmcFailType;
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   * @param failingBodyPartIds failing body part IDs
+   * @param cmcFailType cmc fail type
+   */
   public CMCCaApiException(Throwable cause, List<BodyPartID> failingBodyPartIds, CMCFailType cmcFailType) {
     super(cause);
     this.failingBodyPartIds = failingBodyPartIds;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.data;
 
 import lombok.AllArgsConstructor;
@@ -35,12 +34,19 @@ import java.util.Arrays;
 @Slf4j
 public enum CMCStatusType {
 
+  /** Success */
   success(CMCStatus.success, 0),
+  /** Failed */
   failed(CMCStatus.failed, 2),
+  /** Pending */
   pending(CMCStatus.pending, 3),
+  /** Option not supported */
   noSupport(CMCStatus.noSupport, 4),
+  /** Request must be confirmed */
   confirmRequired(CMCStatus.confirmRequired, 5),
+  /** Proof-of-possession of private key is missing */
   popRequired(CMCStatus.popRequired, 6),
+  /** Some data is missing to complete the request */
   partial(CMCStatus.partial, 7);
 
   private CMCStatus cmcStatus;

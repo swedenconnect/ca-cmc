@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.auth;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -72,7 +71,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CMCUtils {
 
+  /** Random source */
   public static final SecureRandom RNG = new SecureRandom();
+  /** JSON object mapper */
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   /**
@@ -131,6 +132,16 @@ public class CMCUtils {
     return CertificationRequest.getInstance(pkcs10.toASN1Structure().toASN1Primitive());
   }
 
+  /**
+   * Sign encapsulated CMS content
+   *
+   * @param contentType type of content OID
+   * @param content content
+   * @param signerCertChain certificate chain of the signer with the signer certificate first in the list and trust anchor last
+   * @param signer {@link ContentSigner} for signing the data
+   * @return the byte of the signed CMS signature with encapsulated signed data
+   * @throws IOException on error executing the request
+   */
   public static byte[] signEncapsulatedCMSContent(ASN1ObjectIdentifier contentType, ASN1Encodable content, List<X509Certificate> signerCertChain, ContentSigner signer) throws IOException {
     try {
       final Store<?> certs = new JcaCertStore(signerCertChain);
@@ -153,17 +164,42 @@ public class CMCUtils {
     }
   }
 
+  /**
+   * Obtain a CMC Control object from a PKI response object
+   *
+   * @param asn1controlOid the OID of the target CMC Control
+   * @param pkiResponse PKI response object holding CMC Control objects
+   * @return {@link CMCControlObject}
+   * @throws IOException error parsing the PKI response
+   */
   public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIResponse pkiResponse)
     throws IOException {
     return getCMCControlObject(asn1controlOid, getResponseControlSequence(pkiResponse));
 
   }
+
+  /**
+   * Obtain a CMC Control object from a PKI data object (request)
+   *
+   * @param asn1controlOid the OID of the target CMC Control
+   * @param pkiData PKI data object holding CMC Control objects
+   * @return {@link CMCControlObject}
+   * @throws IOException error parsing the PKI data
+   */
   public static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, PKIData pkiData)
     throws IOException {
     TaggedAttribute[] controlSequence = pkiData.getControlSequence();
     return getCMCControlObject(asn1controlOid, controlSequence);
   }
 
+  /**
+   * Obtain a CMC Control object from a list of {@link TaggedAttribute}
+   *
+   * @param asn1controlOid the OID of the target CMC Control
+   * @param controlSequence a list of {@link TaggedAttribute}
+   * @return {@link CMCControlObject}
+   * @throws IOException error parsing the list of {@link TaggedAttribute}
+   */
   private static CMCControlObject getCMCControlObject(ASN1ObjectIdentifier asn1controlOid, TaggedAttribute[] controlSequence)
     throws IOException {
     CMCControlObjectID controlOid = CMCControlObjectID.getControlObjectID(asn1controlOid);
@@ -179,21 +215,38 @@ public class CMCUtils {
     return resultBuilder.build();
   }
 
+  /**
+   * Get the value of a CMC Control. The value object type is determined from the control OID
+   *
+   * @param controlOid the OID of the CMC control
+   * @param controlAttrVals a set of control attribute values
+   * @return attribute value object
+   * @throws IOException error parsing provided data
+   */
   private static Object getRequestControlValue(CMCControlObjectID controlOid, ASN1Set controlAttrVals)
     throws IOException {
+    // Get the basic data object
     Object controlValue = getControlValue(controlOid, controlAttrVals);
+    // If this is custom data, then attempt to extract the AdminCMCData object from the byte array
     if (CMCControlObjectID.regInfo.equals(controlOid) || CMCControlObjectID.responseInfo.equals(controlOid)){
       byte[] dataBytes = (byte[]) controlValue;
-      return getbytesOrJsonObject(dataBytes, AdminCMCData.class);
+      return getBytesOrJsonObject(dataBytes, AdminCMCData.class);
     }
     return controlValue;
   }
 
-  private static Object getbytesOrJsonObject(byte[] regInfoBytes, Class<?> dataClass) {
+  /**
+   * Attempt to extract a particular object of a specified class from a JSON string, or else just return the actual bytes.
+   *
+   * @param inputDataBytes the input data bytes
+   * @param dataClass the object class to be extracted
+   * @return object of the expected data class, or just the input bytes
+   */
+  private static Object getBytesOrJsonObject(byte[] inputDataBytes, Class<?> dataClass) {
     try {
-      return OBJECT_MAPPER.readValue(regInfoBytes, dataClass);
+      return OBJECT_MAPPER.readValue(inputDataBytes, dataClass);
     } catch (Exception ex){
-      return regInfoBytes;
+      return inputDataBytes;
     }
   }
 
@@ -239,6 +292,7 @@ public class CMCUtils {
 
   /**
    * Return the status code value of CMCStatus
+   *
    * @param cmcStatus CMCStatus
    * @return integer value
    * @throws Exception On illegal status value content
@@ -250,6 +304,7 @@ public class CMCUtils {
 
   /**
    * Get the control sequence array from a CMC PKI Response
+   *
    * @param pkiResponse CMC PKI Response
    * @return control data sequence in the form of an array of {@link TaggedAttribute}
    */
@@ -268,6 +323,7 @@ public class CMCUtils {
 
   /**
    * Return a list of certificate bytes representing a list of X509 Certificates
+   *
    * @param certificateList list of certificates
    * @return list of certificate bytes
    * @throws CertificateEncodingException on certificate encoding errors
@@ -282,6 +338,7 @@ public class CMCUtils {
 
   /**
    * Return a list of certificate bytes representing a list of X509 Certificates
+   *
    * @param certificateList list of certificates
    * @return list of certificate bytes
    * @throws IOException on certificate encoding errors
@@ -294,25 +351,63 @@ public class CMCUtils {
     return certByteList;
   }
 
+  /**
+   * Get CA information from a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @return {@link CAInformation}
+   * @throws IOException error parsing data
+   */
   public static CAInformation getCAInformation(CMCResponse cmcResponse) throws IOException {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
   }
+
+  /**
+   * Get AdminCMCData from a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @return {@link AdminCMCData}
+   * @throws IOException error parsing data
+   */
   public static AdminCMCData getAdminCMCData(CMCResponse cmcResponse) throws IOException {
     final CMCControlObject responseControlObject = getResponseControlObject(cmcResponse, CMCObjectIdentifiers.id_cmc_responseInfo);
     return (AdminCMCData) responseControlObject.getValue();
   }
+
+  /**
+   * Get CMC control object from a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @param controlObjOid the OID fot he CMC response
+   * @return {@link CMCControlObject}
+   * @throws IOException error parsing data
+   */
   public static CMCControlObject getResponseControlObject(CMCResponse cmcResponse, ASN1ObjectIdentifier controlObjOid) throws IOException {
     final TaggedAttribute[] taggedAttributes = CMCUtils.getResponseControlSequence(cmcResponse.getPkiResponse());
     return CMCUtils.getCMCControlObject(controlObjOid, taggedAttributes);
   }
 
+  /**
+   * Get all serial numbers of a CA repository from a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @return list of certificate serial numbers
+   * @throws IOException error parsing data
+   */
   public static List<BigInteger> getAllSerials(CMCResponse cmcResponse) throws IOException {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     final List<String> serials = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
     return serials.stream().map(s -> new BigInteger(s, 16)).collect(Collectors.toList());
   }
 
+  /**
+   * Gets the list of certificates contained in a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @return list of certificates
+   * @throws IOException error parsing data
+   */
   public static List<CertificateData> getCertList(CMCResponse cmcResponse) throws IOException {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
@@ -320,6 +415,7 @@ public class CMCUtils {
 
   /**
    * Get the value of the signed signingTime attribute from a CMS signed CMC message
+   *
    * @param cmsContentInfo CMS content info bytes
    * @return signing time attribute value if present, or null
    * @throws CMSException error parsing CMS data
@@ -330,6 +426,7 @@ public class CMCUtils {
 
   /**
    * Get the value of the signed signingTime attribute from a CMS signed CMC message
+   *
    * @param signedData CMS signed data
    * @return signing time attribute value if present, or null
    */

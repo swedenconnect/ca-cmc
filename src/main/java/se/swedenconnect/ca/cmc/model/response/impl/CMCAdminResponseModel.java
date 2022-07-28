@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.response.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,8 +36,18 @@ import java.util.List;
  */
 public class CMCAdminResponseModel extends AbstractCMCResponseModel {
 
+  /** Admin CMC data */
   @Getter private AdminCMCData adminCMCData;
 
+  /**
+   * Constructor
+   *
+   * @param nonce response nonce
+   * @param cmcResponseStatus response status
+   * @param cmcRequestType request type
+   * @param adminCMCData custom admin response data
+   * @throws IOException errors parsing admin response data
+   */
   public CMCAdminResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, AdminCMCData adminCMCData) throws IOException {
     super(nonce, cmcResponseStatus, cmcRequestType, getResponseInfo(adminCMCData));
     this.adminCMCData = adminCMCData;

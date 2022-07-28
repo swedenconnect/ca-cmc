@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.request.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,11 +31,25 @@ import java.io.IOException;
  */
 @Getter
 public class CMCAdminRequestModel extends AbstractCMCRequestModel {
+
+  /**
+   * Constructor for CMC admin request model
+   *
+   * @param adminRequestData  admin request data
+   * @throws IOException on errors parsing admin request data
+   */
   public CMCAdminRequestModel(AdminCMCData adminRequestData)
     throws IOException {
     super(CMCRequestType.admin, getReqInfo(adminRequestData));
   }
 
+  /**
+   * Get the JSON byte representation of the admin request data
+   *
+   * @param adminCMCData admin request data
+   * @return bytes of the admin request data
+   * @throws IOException on errors parsing admin request data
+   */
   private static byte[] getReqInfo(AdminCMCData adminCMCData) throws IOException {
     try {
       return CMCUtils.OBJECT_MAPPER.writeValueAsBytes(adminCMCData);

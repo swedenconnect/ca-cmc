@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.request.impl;
 
 import lombok.Getter;
@@ -34,6 +33,24 @@ import java.util.List;
  */
 @Getter
 public class CMCRevokeRequestModel extends AbstractCMCRequestModel {
+
+  /** Issuer name */
+  private X500Name issuerName;
+  /** Serial number */
+  private BigInteger serialNumber;
+  /** Reason code */
+  private int reason;
+  /** Revocation time */
+  private Date revocationDate;
+
+  /**
+   * Constructor
+   *
+   * @param serialNumber serial number
+   * @param reason reason code
+   * @param revocationDate revocation time
+   * @param issuerName issuer name
+   */
   public CMCRevokeRequestModel(BigInteger serialNumber, int reason, Date revocationDate,
     X500Name issuerName) {
     super(CMCRequestType.revoke);
@@ -42,8 +59,4 @@ public class CMCRevokeRequestModel extends AbstractCMCRequestModel {
     this.revocationDate = revocationDate;
     this.issuerName = issuerName;
   }
-  private X500Name issuerName;
-  private BigInteger serialNumber;
-  private int reason;
-  private Date revocationDate;
 }

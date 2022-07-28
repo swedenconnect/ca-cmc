@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +53,9 @@ public class CMCRequestParser {
 
   /**
    * Constructor for the CMC data parser
+   *
    * @param validator the validator used to validate the signature and authorization of the CMC signer to provide a CMC request
+   * @param cmcReplayChecker replay checker detecting if a CMC request is a replay of an old CMC request
    */
   public CMCRequestParser(CMCValidator validator, CMCReplayChecker cmcReplayChecker) {
     this.validator = validator;
@@ -63,6 +64,7 @@ public class CMCRequestParser {
 
   /**
    * Parse CMC request
+   *
    * @param cmcRequestBytes the bytes of a CMC request
    * @return {@link CMCRequest}
    * @throws IOException on error parsing the CMC request bytes

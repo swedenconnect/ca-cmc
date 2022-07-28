@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.response.impl;
 
 import lombok.Getter;
@@ -35,10 +34,25 @@ import java.util.List;
  */
 public class AbstractCMCResponseModel implements CMCResponseModel {
 
+  /**
+   * Constructor for response model with no custom data
+   *
+   * @param nonce response nonce
+   * @param cmcResponseStatus response status
+   * @param cmcRequestType request type
+   */
   public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType) {
     this(nonce, cmcResponseStatus, cmcRequestType,  null);
   }
 
+  /**
+   * Constructor for response model with custom data
+   *
+   * @param nonce response nonce
+   * @param cmcResponseStatus response status
+   * @param cmcRequestType request type
+   * @param responseInfo custom response data
+   */
   public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, byte[] responseInfo) {
     this.nonce = nonce;
     this.responseInfo = responseInfo;
@@ -47,9 +61,19 @@ public class AbstractCMCResponseModel implements CMCResponseModel {
     this.cmcRequestType = cmcRequestType;
   }
 
+
+  /** Nonce */
   @Getter @Setter protected byte[] nonce;
+
+  /** Response info bytes used to communicate custom result data in the response */
   @Getter @Setter protected byte[] responseInfo;
+
+  /** Certificates returned by the CMC response */
   @Getter @Setter protected List<X509Certificate> returnCertificates;
+
+  /** Status of the CMC response */
   @Getter protected CMCResponseStatus cmcResponseStatus;
+
+  /** CMC Request type */
   @Getter protected CMCRequestType cmcRequestType;
 }

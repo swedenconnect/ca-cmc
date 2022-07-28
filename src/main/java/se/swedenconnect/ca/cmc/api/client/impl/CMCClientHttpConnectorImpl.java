@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.client.impl;
 
 import lombok.NoArgsConstructor;
@@ -28,7 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Description
+ * Implementation of the CMC Client HTTP Connector handling communication with the CA service.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -40,7 +39,8 @@ public class CMCClientHttpConnectorImpl implements CMCClientHttpConnector {
   private static final String CMC_MIME_TYPE = "application/pkcs7-mime";
 
   @Override
-  public CMCHttpResponseData sendCmcRequest(byte[] cmcRequestBytes, URL requestUrl, int connectTimeout, int readTimeout) {
+  /** {@inheritDoc} */
+  public CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl, final int connectTimeout, final int readTimeout) {
     try {
       HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
       connection.setRequestMethod("POST");

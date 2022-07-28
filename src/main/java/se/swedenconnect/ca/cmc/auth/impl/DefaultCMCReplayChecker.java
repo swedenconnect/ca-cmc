@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.auth.impl;
 
 import lombok.*;
@@ -63,17 +62,33 @@ public class DefaultCMCReplayChecker implements CMCReplayChecker {
   long retentionMillis;
   long futureTimeSkewMillis;
 
-
+  /**
+   * Constructor
+   *
+   * @param maxAgeSec the maximum age in seconds allowed for CMC requests before they are discarded for being too old
+   * @param retentionSec the maximum time information about a processed CMC request is stored for replay checking
+   * @param futureTimeSkewSec the maximum time skew allowed between requester and responder
+   */
   public DefaultCMCReplayChecker(int maxAgeSec, long retentionSec, long futureTimeSkewSec) {
     this.maxAgeMillis = 1000L * maxAgeSec;
     this.retentionMillis = 1000L * retentionSec;
     this.futureTimeSkewMillis = 1000L * futureTimeSkewSec;
     log.info("Replay checker created with system start time = {}, max age sec={}, retention sec={}, future time skew sec={}", startupTime, maxAgeSec, retentionSec, futureTimeSkewSec);
   }
+
+  /**
+   * Constructor with fixed max skew time set to 60 seconds
+   *
+   * @param maxAgeSec the maximum age in seconds allowed for CMC requests before they are discarded for being too old
+   * @param retentionSec the maximum time information about a processed CMC request is stored for replay checking
+   */
   public DefaultCMCReplayChecker(int maxAgeSec, long retentionSec) {
     this (maxAgeSec, retentionSec, 60);
   }
 
+  /**
+   * Constructor with default values (Max age = 120 sec, Retention = 200 sec and time skew = 60 sec)
+   */
   public DefaultCMCReplayChecker() {
     this(120, 200, 60);
   }
@@ -123,10 +138,15 @@ public class DefaultCMCReplayChecker implements CMCReplayChecker {
       .collect(Collectors.toList());
   }
 
+  /**
+   * Data class for holding replay data for replay tests on CMC requests
+   */
   @Getter
   @AllArgsConstructor
   public static class ReplayData {
+    /** the nonce value of the CMC request  */
     byte[] nonce;
+    /** the time the CMC request with this nonce was processed */
     Date messageTime;
   }
 
