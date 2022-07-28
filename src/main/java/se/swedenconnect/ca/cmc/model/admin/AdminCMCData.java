@@ -32,9 +32,19 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AdminCMCData {
 
-  /** Type of admin request */
+  /**
+   * Type of admin request
+   *
+   * @param adminRequestType admin request type
+   * @return admin request type
+   */
   private AdminRequestType adminRequestType;
-  /** Admin request/response data */
+  /**
+   * Admin request/response data
+   *
+   * @param data data
+   * @return data
+   */
   private String data;
 
 }

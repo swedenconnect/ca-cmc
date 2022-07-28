@@ -62,18 +62,41 @@ public class AbstractCMCResponseModel implements CMCResponseModel {
   }
 
 
-  /** Nonce */
+  /**
+   * Nonce
+   *
+   * @param nonce nonce
+   * @return nonce value
+   */
   @Getter @Setter protected byte[] nonce;
 
-  /** Response info bytes used to communicate custom result data in the response */
+  /**
+   * Response info bytes used to communicate custom result data in the response
+   *
+   * @param responseInfo response info
+   * @return response info bytes
+   */
   @Getter @Setter protected byte[] responseInfo;
 
-  /** Certificates returned by the CMC response */
+  /**
+   * Certificates returned by the CMC response
+   *
+   * @param returnCertificates return certificates
+   * @return certificates returned in CMC response
+   */
   @Getter @Setter protected List<X509Certificate> returnCertificates;
 
-  /** Status of the CMC response */
+  /**
+   * Status of the CMC response
+   *
+   * @return cmc response status
+   */
   @Getter protected CMCResponseStatus cmcResponseStatus;
 
-  /** CMC Request type */
+  /**
+   * CMC Request type
+   *
+   * @return cmc request type
+   */
   @Getter protected CMCRequestType cmcRequestType;
 }

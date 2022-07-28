@@ -61,8 +61,8 @@ public abstract class AbstractCMCRequestModel implements CMCRequestModel {
   /**
    * Gets the request nonce
    *
-//   * @param nonce request nonce
-//   * @return request nonce
+   * @param nonce request nonce
+   * @return request nonce
    */
   @Getter @Setter protected byte[] nonce;
 
@@ -70,18 +70,16 @@ public abstract class AbstractCMCRequestModel implements CMCRequestModel {
    * The registration info data. This parameter is generally used to pass custom request data.
    * Each request type identifies the syntax of this parameter
    *
-//   * @param registrationInfo registration info data
-//   * @return registration info data
+   * @param registrationInfo registration info data
+   * @return registration info data
    */
   @Getter @Setter protected byte[] registrationInfo;
 
   /**
    * The type of request
    *
-//   * @return CMC request type
+   * @return CMC request type
    */
   @Getter protected CMCRequestType cmcRequestType;
-
-
 
 }

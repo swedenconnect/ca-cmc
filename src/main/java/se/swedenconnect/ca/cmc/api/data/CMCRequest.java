@@ -51,9 +51,4 @@ public class CMCRequest {
   /** The PKIData structure of this CMC request */
   private PKIData pkiData;
 
-  /**
-   * Dummy declaration of lombok generated builder to keep javadoc testing happy
-   */
-  public static class CMCRequestBuilder {}
-
 }
