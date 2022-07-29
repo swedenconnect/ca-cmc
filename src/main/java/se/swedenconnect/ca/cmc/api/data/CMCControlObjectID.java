@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.data;
 
 import lombok.AllArgsConstructor;
@@ -35,35 +34,66 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public enum CMCControlObjectID {
+
+  /** CMC status info */
   statusInfo(CMCObjectIdentifiers.id_cmc_statusInfo),
+  /** CMC identification */
   identification(CMCObjectIdentifiers.id_cmc_identification),
+  /** CMC identity proof */
   identityProof(CMCObjectIdentifiers.id_cmc_identityProof),
+  /** CMC data return */
   dataReturn(CMCObjectIdentifiers.id_cmc_dataReturn),
+  /** CMC transaction ID */
   transactionId(CMCObjectIdentifiers.id_cmc_transactionId),
+  /** CMC sender nonce */
   senderNonce(CMCObjectIdentifiers.id_cmc_senderNonce),
+  /** CMC recipient nonce */
   recipientNonce(CMCObjectIdentifiers.id_cmc_recipientNonce),
+  /** CMC add extensions */
   addExtensions(CMCObjectIdentifiers.id_cmc_addExtensions),
+  /** CMC encrypted POP */
   encryptedPOP(CMCObjectIdentifiers.id_cmc_encryptedPOP),
+  /** CMC decrypted POP */
   decryptedPOP(CMCObjectIdentifiers.id_cmc_decryptedPOP),
+  /** CMC LRA POP witness */
   lraPOPWitness(CMCObjectIdentifiers.id_cmc_lraPOPWitness),
+  /** Get certificate */
   getCert(CMCObjectIdentifiers.id_cmc_getCert),
+  /** Get CRL */
   getCRL(CMCObjectIdentifiers.id_cmc_getCRL),
+  /** CMC revoke request */
   revokeRequest(CMCObjectIdentifiers.id_cmc_revokeRequest),
+  /** CMC registration info used as extension point for custom requests */
   regInfo(CMCObjectIdentifiers.id_cmc_regInfo),
+  /** CMC response info used as extension point for custom response data */
   responseInfo(CMCObjectIdentifiers.id_cmc_responseInfo),
+  /** CMC Query pending */
   queryPending(CMCObjectIdentifiers.id_cmc_queryPending),
+  /** CMC POP link random */
   popLinkRandom(CMCObjectIdentifiers.id_cmc_popLinkRandom),
+  /** CMC POP link witness */
   popLinkWitness(CMCObjectIdentifiers.id_cmc_popLinkWitness),
+  /** CMC POP link witness V2 */
   popLinkWitnessV2(CMCObjectIdentifiers.id_cmc_popLinkWitnessV2),
+  /** CMC confirm certificate acceptance */
   confirmCertAcceptance(CMCObjectIdentifiers.id_cmc_confirmCertAcceptance),
+  /** CMC status info V2 */
   statusInfoV2(CMCObjectIdentifiers.id_cmc_statusInfoV2),
+  /** CMC trusted anchors */
   trustedAnchors(CMCObjectIdentifiers.id_cmc_trustedAnchors),
+  /** CMC auth data */
   authData(CMCObjectIdentifiers.id_cmc_authData),
+  /** CMC batch requests */
   batchRequests(CMCObjectIdentifiers.id_cmc_batchRequests),
+  /** CMC batch responses */
   batchResponses(CMCObjectIdentifiers.id_cmc_batchResponses),
+  /** CMC publish certificate */
   publishCert(CMCObjectIdentifiers.id_cmc_publishCert),
+  /** CMC public certificate */
   modCertTemplate(CMCObjectIdentifiers.id_cmc_modCertTemplate),
+  /** CMC control processed */
   controlProcessed(CMCObjectIdentifiers.id_cmc_controlProcessed),
+  /** CMC identity proof V2 */
   identityProofV2(CMCObjectIdentifiers.id_cmc_identityProofV2);
 
 

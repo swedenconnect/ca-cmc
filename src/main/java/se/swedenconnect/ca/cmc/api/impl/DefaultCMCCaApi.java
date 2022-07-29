@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.impl;
 
 import org.bouncycastle.asn1.*;
@@ -68,11 +67,19 @@ import java.util.stream.Collectors;
  */
 public class DefaultCMCCaApi extends AbstractAdminCMCCaApi {
 
+  /**
+   * Constructor
+   *
+   * @param caService the CA service providing CA service operations
+   * @param cmcRequestParser parser for parsing CMC requests
+   * @param cmcResponseFactory factory for creating CMC responses
+   */
   public DefaultCMCCaApi(CAService caService,
     CMCRequestParser cmcRequestParser, CMCResponseFactory cmcResponseFactory) {
     super(caService, cmcRequestParser, cmcResponseFactory);
   }
 
+  /** {@inheritDoc} */
   @Override CertificateModel getCertificateModel(CMCRequest cmcRequest) throws Exception {
     CertificationRequest certificationRequest = cmcRequest.getCertificationRequest();
     CertificateRequestMessage certificateRequestMessage = cmcRequest.getCertificateRequestMessage();

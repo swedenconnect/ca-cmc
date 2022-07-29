@@ -1,3 +1,18 @@
+/*
+ * Copyright 2022 Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package se.swedenconnect.ca.cmc.api.client;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,15 +31,23 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Description
+ * Providing a set of static CMC response data extraction functions
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public class CMCResponseExtract {
 
+  /** JSON object mapper */
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  /**
+   * Obtain admin CMC data from a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @return {@link AdminCMCData}
+   * @throws IOException error parsing CMC response
+   */
   public static AdminCMCData getAdminCMCData (CMCResponse cmcResponse) throws IOException {
     if (!cmcResponse.getCmcRequestType().equals(CMCRequestType.admin)){
       throw new IOException("Not an admin response");
@@ -34,6 +57,13 @@ public class CMCResponseExtract {
     return adminCMCData;
   }
 
+  /**
+   * Extract certificate data from a CMC response
+   *
+   * @param cmcResponse CMC response
+   * @return list of certificate data
+   * @throws IOException error parsing CMC response
+   */
   public static List<CertificateData> extractCertificateData(CMCResponse cmcResponse) throws IOException {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.listCerts)){
@@ -43,6 +73,13 @@ public class CMCResponseExtract {
     return certificateDataList;
   }
 
+  /**
+   * Extract CA information from a CMC Response
+   *
+   * @param cmcResponse CMC response
+   * @return {@link CAInformation}
+   * @throws IOException error parsing the CMC response
+   */
   public static CAInformation extractCAInformation(CMCResponse cmcResponse) throws IOException {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.caInfo)){

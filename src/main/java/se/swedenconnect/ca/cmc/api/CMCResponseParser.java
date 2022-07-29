@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api;
 
 import lombok.extern.slf4j.Slf4j;
@@ -133,6 +132,12 @@ public class CMCResponseParser {
     return cmcResponseStatus;
   }
 
+  /**
+   * Get CMC fail type from CMC status info V2
+   *
+   * @param statusInfoV2 status info V2 data
+   * @return {@link CMCFailType}
+   */
   public static CMCFailType getCmcFailType(CMCStatusInfoV2 statusInfoV2) {
     OtherStatusInfo otherStatusInfo = statusInfoV2.getOtherStatusInfo();
     if (otherStatusInfo != null && otherStatusInfo.isFailInfo()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.auth.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +50,13 @@ import java.util.*;
 @Slf4j
 public abstract class AbstractCMCValidator implements CMCValidator {
 
+  /**
+   * Constructor
+   */
   public AbstractCMCValidator() {
   }
 
+  /** {@inheritDoc} */
   @Override public CMCValidationResult validateCMC(byte[] cmcMessage) {
 
     CMCValidationResult result = new CMCValidationResult();
@@ -104,7 +107,7 @@ public abstract class AbstractCMCValidator implements CMCValidator {
    * Verifies the CMS signature
    * @param cmsSignedData the signed data to verify
    * @return The signing certificate chain if the verification was successful
-   * @throws IOException if signature validation failed
+   * @throws CMCValidationException if signature validation failed
    */
   protected abstract List<X509CertificateHolder> verifyCMSSignature(CMSSignedData cmsSignedData) throws CMCValidationException;
 
@@ -113,7 +116,7 @@ public abstract class AbstractCMCValidator implements CMCValidator {
    * @param signer the verified signer of this CMC message
    * @param contentType the CMC encapsulated data content type
    * @param cmsSignedData the CMC message signed data to be authorized
-   * @throws Exception if authorization fails
+   * @throws CMCAuthorizationException if authorization fails
    */
   protected abstract void verifyAuthorization(X509CertificateHolder signer, ASN1ObjectIdentifier contentType, CMSSignedData cmsSignedData) throws
     CMCAuthorizationException;

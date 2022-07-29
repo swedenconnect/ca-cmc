@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.request.impl;
 
 import lombok.Getter;
@@ -33,6 +32,13 @@ import java.util.List;
  */
 @Getter
 public class CMCGetCertRequestModel extends AbstractCMCRequestModel {
+
+  /**
+   * Constructor
+   *
+   * @param serialNumber serial number of certificate to revoke
+   * @param issuerName issuer name of the certificate issuer
+   */
   public CMCGetCertRequestModel(BigInteger serialNumber,
     X500Name issuerName) {
     super(CMCRequestType.getCert);

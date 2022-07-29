@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.List;
 
 /**
- * Description
+ * Test result data printing
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -47,7 +47,6 @@ public class CMCDataPrint {
 
     try {
       StringBuilder b = new StringBuilder();
-      String cmcBase64 = Base64.toBase64String(cmcRequest.getCmcRequestBytes());
       CMCRequestType cmcRequestType = cmcRequest.getCmcRequestType();
       b.append("CMC request type: ").append(cmcRequestType).append("\n");
       PKIData pkiData = cmcRequest.getPkiData();

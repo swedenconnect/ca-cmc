@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api;
 
 import org.bouncycastle.asn1.*;
@@ -49,7 +48,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This class is intended to be used as a bean for creating CMC requests
+ * This class provides the logic for creating CMC requests. This class is intended to be instantiated as a bean.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -65,6 +64,7 @@ public class CMCRequestFactory {
 
   /**
    * Constructor
+   *
    * @param signerCertChain signer certificate chain for signing CMC requests
    * @param signer a CMS Content signer used to sign CMC requests
    */
@@ -75,6 +75,7 @@ public class CMCRequestFactory {
 
   /**
    * Create a CMC Request
+   *
    * @param cmcRequestModel model holding the data necessary to create a CMC request
    * @return CMC Request
    * @throws IOException on failure to create a valid CMC request
@@ -117,7 +118,8 @@ public class CMCRequestFactory {
   }
 
   private PKIData createGetCertRequest(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
-    return new PKIData(getGetCertsControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
+    return new PKIData(getGetCertsControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {},
+      new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
   private TaggedAttribute[] getGetCertsControlSequence(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
@@ -131,7 +133,8 @@ public class CMCRequestFactory {
   }
 
   private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel) {
-    return new PKIData(getAdminControlSequence(cmcRequestModel), new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
+    return new PKIData(getAdminControlSequence(cmcRequestModel), new TaggedRequest[] {}, new TaggedContentInfo[] {},
+      new OtherMsg[] {});
   }
 
   private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel) {
@@ -146,14 +149,18 @@ public class CMCRequestFactory {
 
     TaggedRequest taggedCertificateRequest;
     BodyPartID certReqBodyPartId = getBodyPartId();
-    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(), certReqBodyPartId);
+    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(),
+      certReqBodyPartId);
     PrivateKey certReqPrivate = cmcRequestModel.getCertReqPrivate();
     if (certReqPrivate != null) {
-      ContentSigner p10Signer = new JcaContentSignerBuilder(CAAlgorithmRegistry.getSigAlgoName(cmcRequestModel.getP10Algorithm()))
+      ContentSigner p10Signer = new JcaContentSignerBuilder(
+        CAAlgorithmRegistry.getSigAlgoName(cmcRequestModel.getP10Algorithm()))
         .build(certReqPrivate);
-      CertificationRequest certificationRequest = CMCUtils.getCertificationRequest(cmcRequestModel.getCertificateModel(), p10Signer,
+      CertificationRequest certificationRequest = CMCUtils.getCertificationRequest(
+        cmcRequestModel.getCertificateModel(), p10Signer,
         new AttributeValueEncoder());
-      taggedCertificateRequest = new TaggedRequest(new TaggedCertificationRequest(certReqBodyPartId, certificationRequest));
+      taggedCertificateRequest = new TaggedRequest(
+        new TaggedCertificationRequest(certReqBodyPartId, certificationRequest));
     }
     else {
       CertificateRequestMessageBuilder crmfBuilder = CMCUtils.getCRMFRequestMessageBuilder(certReqBodyPartId,
@@ -163,16 +170,19 @@ public class CMCRequestFactory {
       taggedCertificateRequest = new TaggedRequest(certificateRequestMessage.toASN1Structure());
     }
 
-    return new PKIData(controlSequence, new TaggedRequest[] { taggedCertificateRequest }, new TaggedContentInfo[] {}, new OtherMsg[] {});
+    return new PKIData(controlSequence, new TaggedRequest[] { taggedCertificateRequest }, new TaggedContentInfo[] {},
+      new OtherMsg[] {});
   }
 
   /**
    * Extension point for manipulating and extending the CRMF certificate template
+   *
    * @param crmfBuilder the CRMF builder holding default certificate template data
    * @param cmcRequestModel CMC request model holding data about the CMC request to be built
    */
-  protected void extendCertTemplate(CertificateRequestMessageBuilder crmfBuilder, CMCCertificateRequestModel cmcRequestModel) {
-    // Extend crmf cert template based on cmcRequestModel
+  protected void extendCertTemplate(CertificateRequestMessageBuilder crmfBuilder,
+    CMCCertificateRequestModel cmcRequestModel) {
+    // Override this function to extend crmf cert template based on cmcRequestModel
   }
 
   private static BodyPartID getBodyPartId() {
@@ -219,16 +229,40 @@ public class CMCRequestFactory {
     }
   }
 
+  /**
+   * Add nonce data to a list of tagged attributes. This function can be used to include nonce in both CMC requests and
+   * CMC responses
+   *
+   * @param taggedAttributeList list of tagged attributes to which the nonce should be added
+   * @param nonce nonce data to be added
+   */
   public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
     if (nonce != null) {
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_senderNonce, new DEROctetString(nonce)));
     }
   }
 
+  /**
+   * Get a CMC Control in the form of a {@link TaggedAttribute} based on the components OID, and
+   * a set of attribute values. BodyPartID will be randomly generated.
+   *
+   * @param oid Control OID
+   * @param values attribute values
+   * @return {@link TaggedAttribute} containing CMC Control data
+   */
   public static TaggedAttribute getControl(ASN1ObjectIdentifier oid, ASN1Encodable... values) {
     return getControl(oid, null, values);
   }
 
+  /**
+   * Get a CMC Control in the form of a {@link TaggedAttribute} based on the components OID, BodyPartID and
+   * a set of attribute values
+   *
+   * @param oid Control OID
+   * @param id BodyPartID or null to get a randomly generated BodyPartID
+   * @param values attribute values
+   * @return {@link TaggedAttribute} containing CMC Control data
+   */
   public static TaggedAttribute getControl(ASN1ObjectIdentifier oid, BodyPartID id, ASN1Encodable... values) {
     if (id == null) {
       id = getBodyPartId();
@@ -237,6 +271,12 @@ public class CMCRequestFactory {
     return new TaggedAttribute(id, oid, valueSet);
   }
 
+  /**
+   * Construct an ASN.1 set of attribute values
+   *
+   * @param content attribute values
+   * @return ASN.1 set of attribute values
+   */
   public static ASN1Set getSet(ASN1Encodable... content) {
     ASN1EncodableVector valueSet = new ASN1EncodableVector();
     for (ASN1Encodable data : content) {
@@ -245,6 +285,13 @@ public class CMCRequestFactory {
     return new DERSet(valueSet);
   }
 
+  /**
+   * Adds a certificate request from PKIData to a CMC request builder. This allows the request builder
+   * to build a CMC request that includes a certificate issuance request.
+   *
+   * @param pkiData PKIData holding the certificate request in the form of a PKCS#10 request or a CRMF request
+   * @param cmcRequestBuilder CMC request builder to which the certificate request should be added
+   */
   private void addCertRequestData(PKIData pkiData, CMCRequest.CMCRequestBuilder cmcRequestBuilder) {
     if (pkiData == null || pkiData.getReqSequence() == null) {
       return;
@@ -253,6 +300,7 @@ public class CMCRequestFactory {
     for (TaggedRequest taggedRequest : reqSequence) {
       ASN1Encodable taggedRequestValue = taggedRequest.getValue();
       if (taggedRequestValue instanceof TaggedCertificationRequest) {
+        // This is a PKCS#10 request
         TaggedCertificationRequest taggedCertReq = (TaggedCertificationRequest) taggedRequestValue;
         ASN1Sequence taggedCertReqSeq = ASN1Sequence.getInstance(taggedCertReq.toASN1Primitive());
         BodyPartID certReqBodyPartId = BodyPartID.getInstance(taggedCertReqSeq.getObjectAt(0));
@@ -263,7 +311,9 @@ public class CMCRequestFactory {
         return;
       }
       if (taggedRequestValue instanceof CertReqMsg) {
-        CertificateRequestMessage certificateRequestMessage = new CertificateRequestMessage((CertReqMsg) taggedRequestValue);
+        // This is a CRMF request
+        CertificateRequestMessage certificateRequestMessage = new CertificateRequestMessage(
+          (CertReqMsg) taggedRequestValue);
         ASN1Integer certReqId = ((CertReqMsg) taggedRequestValue).getCertReq().getCertReqId();
         BodyPartID certReqBodyPartId = new BodyPartID(certReqId.longValueExact());
         cmcRequestBuilder

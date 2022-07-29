@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.request.impl;
 
+import com.sun.istack.Nullable;
 import lombok.*;
 import org.bouncycastle.operator.ContentSigner;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
@@ -35,15 +35,29 @@ import java.util.List;
 @Getter
 public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
 
-  public CMCCertificateRequestModel(CertificateModel certificateModel, String profile) {
+  /**
+   * Constructor for sending a certificate request using CRMF and POP whiteness
+   *
+   * @param certificateModel certificate model
+   * @param profile optional profile that may be used by the recipient to determine some certificate content
+   */
+  public CMCCertificateRequestModel(final CertificateModel certificateModel, @Nullable final String profile) {
     super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
     this.certificateModel = certificateModel;
     this.lraPopWitness = true;
   }
 
-  public CMCCertificateRequestModel(CertificateModel certificateModel, String profile,
-    PrivateKey certReqPrivate, String p10Algorithm) {
-    super(CMCRequestType.issueCert,profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
+  /**
+   * Constructor for sending a certificate request based on a signed PKCS#10 request
+   *
+   * @param certificateModel certificate model
+   * @param profile optional profile that may be used by the recipient to determine some certificate content
+   * @param certReqPrivate private key of the certificate holder
+   * @param p10Algorithm algorithm used to sign the PKCS 10 request
+   */
+  public CMCCertificateRequestModel(final CertificateModel certificateModel, @Nullable final String profile,
+    final PrivateKey certReqPrivate, final String p10Algorithm) {
+    super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
     this.certificateModel = certificateModel;
     this.certReqPrivate = certReqPrivate;
     this.p10Algorithm = p10Algorithm;

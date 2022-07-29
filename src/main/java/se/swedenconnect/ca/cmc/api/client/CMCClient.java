@@ -1,9 +1,23 @@
+/*
+ * Copyright 2022 Agency for Digital Government (DIGG)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package se.swedenconnect.ca.cmc.api.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.ContentSigner;
@@ -31,9 +45,7 @@ import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -46,7 +58,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Description
+ * Implements the CMC Client used to execute CA management operations via CMC on a remote CA
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -69,6 +81,20 @@ public class CMCClient {
   @Setter private int caInfoMaxAge = 600000;
   @Setter private CMCClientHttpConnector cmcClientHttpConnector;
 
+  /**
+   * Constructor for the CMC Client
+   *
+   * @param cmcRequestUrl URL where CMC requests are sent to the remote CA
+   * @param cmcSigningKey CMC client signing key
+   * @param cmcSigningCert CMC client signing certificate
+   * @param algorithm CMC signing algorithm
+   * @param cmcResponseCert signing certificate of the remote CA CMC responder
+   * @param caCertificate CA certificate used by the remote CA to issue certificates
+   * @throws MalformedURLException malformed URL
+   * @throws NoSuchAlgorithmException algorithm is not supported or recognized
+   * @throws OperatorCreationException error setting up CMC client
+   * @throws CertificateEncodingException error parsing provided certificates
+   */
   public CMCClient(String cmcRequestUrl, PrivateKey cmcSigningKey, X509Certificate cmcSigningCert, String algorithm,
     X509Certificate cmcResponseCert, X509Certificate caCertificate)
     throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
@@ -79,6 +105,12 @@ public class CMCClient {
     this.cmcClientHttpConnector = new CMCClientHttpConnectorImpl();
   }
 
+  /**
+   * Request information about the remote CA
+   *
+   * @return CMC response with CA information or appropriate status information
+   * @throws IOException error processing the request or communicating with the remote CA
+   */
   public CMCResponse caInfoRequest() throws IOException {
 
     final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
@@ -88,6 +120,12 @@ public class CMCClient {
     return getCMCResponse(cmcRequest);
   }
 
+  /**
+   * Request a list of all certificate serial numbers in the current CA repository
+   *
+   * @return CMC response with certificate serial numbers or appropriate status information
+   * @throws IOException error processing the request or communicating with the remote CA
+   */
   public CMCResponse allSerialsRequest() throws IOException {
     final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
       .adminRequestType(AdminRequestType.allCertSerials)
@@ -96,11 +134,25 @@ public class CMCClient {
     return getCMCResponse(cmcRequest);
   }
 
+  /**
+   * Send a request to issue a certificate
+   *
+   * @param certificateModel certificate model describing the content of the certificate to be issued
+   * @return CMC response with issued certificate or appropriate status information
+   * @throws IOException error processing the request or communicating with the remote CA
+   */
   public CMCResponse certIssuerRequest(CertificateModel certificateModel) throws IOException {
     final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, "crmf"));
     return getCMCResponse(cmcRequest);
   }
 
+  /**
+   * Send a request to retrieve a particular certificate
+   *
+   * @param serialNumber serial number of the certificate to retrieve
+   * @return CMC response with the retrieved certificate or appropriate status information
+   * @throws IOException error processing the request or communicating with the remote CA
+   */
   public CMCResponse getCertRequest(BigInteger serialNumber) throws IOException {
     final CAInformation caInformation = getCAInformation(false);
     X509CertificateHolder caIssuerCert = new X509CertificateHolder(caInformation.getCertificateChain().get(0));
@@ -108,6 +160,15 @@ public class CMCClient {
     return getCMCResponse(cmcRequest);
   }
 
+  /**
+   * Send a request to revoke a certificate
+   *
+   * @param serialNumber the serial number of the certificate to revoke
+   * @param reason the reason code for the revocation
+   * @param revocationDate the date of revocation
+   * @return CMC response with appropriate status information
+   * @throws IOException error processing the request or communicating with the remote CA
+   */
   public CMCResponse revokeCertificateRequest(BigInteger serialNumber, int reason, Date revocationDate) throws IOException {
     final CAInformation caInformation = getCAInformation(false);
     X509CertificateHolder caIssuerCert = new X509CertificateHolder(caInformation.getCertificateChain().get(0));
@@ -120,6 +181,19 @@ public class CMCClient {
     return getCMCResponse(cmcRequest);
   }
 
+  /**
+   * Send a request to list a range of certificates in the CA repository. This function divide certificates into
+   * pages with a fixed amount of certificates in each page. This function allows to retrieve a page of certificates
+   * and to specify the conditions for constructing this page.
+   *
+   * @param pageSize the number of certificates in each page
+   * @param pageIndex the index of the page of the requested size to return
+   * @param sortBy indication of whether pages of certificates should be sorted by issue date or serial number
+   * @param notRevoked tue to exclude all revoked certificates from the pages of certificates
+   * @param descending true to use descending sorting order
+   * @return the identified page of certificates
+   * @throws IOException on error processing the request
+   */
   public CMCResponse listCertificatesRequest(int pageSize, int pageIndex, SortBy sortBy, boolean notRevoked, boolean descending) throws IOException {
     final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
       .adminRequestType(AdminRequestType.listCerts)
@@ -136,10 +210,11 @@ public class CMCClient {
 
   /**
    * Legacy request where the descending option is set to false.
-   * @param pageSize the number of items to return, if available
-   * @param pageIndex the index of the page
-   * @param sortBy the item to sort by
-   * @param notRevoked true if only non revoked items are returned
+   *
+   * @param pageSize the number of certificates in each page
+   * @param pageIndex the index of the page of the requested size to return
+   * @param sortBy indication of whether pages of certificates should be sorted by issue date or serial number
+   * @param notRevoked tue to exclude all revoked certificates from the pages of certificates
    * @return CMCResponse
    * @throws IOException on error processing the request
    */
@@ -174,6 +249,14 @@ public class CMCClient {
     return certModelBuilder;
   }
 
+  /**
+   * Send a CMC request to obtain information about the remote CA
+   *
+   * @param forceRecache set to true to force this request to be sent and processed by the remote CA and set to false to
+   *                     allow the API to return cached information if it is reasonably fresh
+   * @return CA information about the remote CA
+   * @throws IOException on error processing the request
+   */
   public CAInformation getCAInformation(boolean forceRecache) throws IOException {
     if (!forceRecache) {
       if (this.cachedCAInformation != null && lastCAInfoRecache != null) {

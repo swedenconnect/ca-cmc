@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.auth;
-
-import lombok.Getter;
 
 /**
  * Exception thrown during CMC validation
@@ -26,21 +23,50 @@ import lombok.Getter;
  */
 public class CMCValidationException extends RuntimeException {
 
+  private static final long serialVersionUID = -7894074545287404113L;
+
+  /**
+   * Constructor
+   */
   public CMCValidationException() {
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   */
   public CMCValidationException(String message) {
     super(message);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   */
   public CMCValidationException(String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   */
   public CMCValidationException(Throwable cause) {
     super(cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param enableSuppression enable suppression
+   * @param writableStackTrace writable stack trace
+   */
   public CMCValidationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }

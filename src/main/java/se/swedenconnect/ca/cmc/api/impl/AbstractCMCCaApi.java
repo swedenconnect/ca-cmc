@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.impl;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Basic abstract CMC CA API implementation
+ * Abstract CMC CA API implementation implementing the functions of a CA service serving requests for service
+ * received in the form of a CMC request.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -48,10 +48,20 @@ import java.util.List;
 @Slf4j
 public abstract class AbstractCMCCaApi implements CMCCaApi {
 
+  /** CA service performing requested CA operations */
   protected final CAService caService;
+  /** Request parser used to parse CMC requests */
   protected final CMCRequestParser cmcRequestParser;
+  /** Factory for constructing CMC responses */
   protected final CMCResponseFactory cmcResponseFactory;
 
+  /**
+   * Constructor
+   *
+   * @param caService the CA service providing CA service operations
+   * @param cmcRequestParser parser for parsing CMC requests
+   * @param cmcResponseFactory factory for creating CMC responses
+   */
   public AbstractCMCCaApi(CAService caService, CMCRequestParser cmcRequestParser,
     CMCResponseFactory cmcResponseFactory) {
     this.caService = caService;
@@ -59,6 +69,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     this.cmcResponseFactory = cmcResponseFactory;
   }
 
+  /** {@inheritDoc} */
   @Override public CMCResponse processRequest(byte[] cmcRequestBytes) {
 
     byte[] nonce = new byte[]{};
@@ -139,6 +150,13 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     }
   }
 
+  /**
+   * Process certificate issuing request
+   *
+   * @param cmcRequest CMC request
+   * @return CMC response
+   * @throws CMCCaApiException error parsing the certificate issuing request
+   */
   protected CMCResponse processCertIssuingRequest(CMCRequest cmcRequest) throws CMCCaApiException {
 
     try {
@@ -172,6 +190,13 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
    */
   abstract CertificateModel getCertificateModel(CMCRequest cmcRequest) throws Exception;
 
+  /**
+   * Process a request to revoke a certificate
+   *
+   * @param cmcRequest CMC request
+   * @return CMC response
+   * @throws CMCCaApiException error parsing the revocation request
+   */
   protected CMCResponse processRevokeRequest(CMCRequest cmcRequest) throws CMCCaApiException {
     try {
       PKIData pkiData = cmcRequest.getPkiData();
@@ -207,6 +232,14 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     }
   }
 
+  /**
+   * Process a custom request that adds to the standard CMC API by passing request data in the CMC request info
+   * byte array.
+   *
+   * @param cmcRequest CMC request
+   * @return CMC response
+   * @throws Exception error parsing this as a valid custom request
+   */
   protected CMCResponse processCustomRequest(CMCRequest cmcRequest) throws Exception {
     PKIData pkiData = cmcRequest.getPkiData();
     CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_regInfo, pkiData);
@@ -222,8 +255,22 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
     return cmcResponseFactory.getCMCResponse(responseModel);
   }
 
+  /**
+   * Process the admin request data and return the resulting admin response data as part of service a custom CMC request
+   *
+   * @param adminRequest admin CMC request data
+   * @return admin CMC response data
+   * @throws Exception on errors processing this request
+   */
   protected abstract AdminCMCData getAdminResponse(AdminCMCData adminRequest) throws Exception;
 
+  /**
+   * Process a request to get a certificate from the CA repository
+   *
+   * @param cmcRequest CMC request
+   * @return CMC response
+   * @throws CMCCaApiException error processing this request
+   */
   protected CMCResponse processGetCertRequest(CMCRequest cmcRequest) throws CMCCaApiException {
     List<BodyPartID> requestBodyParts = new ArrayList<>();
     try {

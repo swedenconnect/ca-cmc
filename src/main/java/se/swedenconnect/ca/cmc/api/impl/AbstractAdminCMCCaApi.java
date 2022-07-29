@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,17 +34,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The default admin implementation of the CMC CA API
+ * The default admin implementation of the CMC CA API. This implementation extends the AbstractCMCCaApi which
+ * provides the basic CMC API features. This implementation extends this with a default implementation of
+ * a handler of admin API requests.
+ *
+ * <p>
+ * Note that the admin CMC requests are using a custom protocol structure adding to standardized CMC using generic
+ * data transfer. A CMC API that does not implement the admin features would directly implement the AbstractCMCCaApi class.
+ * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
+
+  /**
+   * Constructor
+   *
+   * @param caService the CA service providing CA service operations
+   * @param cmcRequestParser parser for parsing CMC requests
+   * @param cmcResponseFactory factory for creating CMC responses
+   */
   public AbstractAdminCMCCaApi(CAService caService,
     CMCRequestParser cmcRequestParser, CMCResponseFactory cmcResponseFactory) {
     super(caService, cmcRequestParser, cmcResponseFactory);
   }
 
+  /** {@inheritDoc} */
   @Override protected AdminCMCData getAdminResponse(AdminCMCData adminRequest) throws Exception {
 
     AdminRequestType adminRequestType = adminRequest.getAdminRequestType();

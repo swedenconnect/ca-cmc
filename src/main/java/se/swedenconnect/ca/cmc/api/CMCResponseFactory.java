@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.api;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -118,13 +117,17 @@ public class CMCResponseFactory {
     return taggedAttributeList;
   }
 
+  /**
+   * Adds nonce data to a list of tagged attributes
+   *
+   * @param taggedAttributeList list of tagged attributes
+   * @param nonce nonce data
+   */
   public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
     if (nonce != null) {
       taggedAttributeList.add(CMCRequestFactory.getControl(CMCObjectIdentifiers.id_cmc_recipientNonce, new DEROctetString(nonce)));
     }
   }
-
-
 
   private void addStatusControl(List<TaggedAttribute> taggedAttributeList, CMCResponseModel cmcResponseModel) {
     CMCResponseStatus cmcResponseStatus = cmcResponseModel.getCmcResponseStatus();

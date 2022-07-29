@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.model.admin;
 
 import lombok.AllArgsConstructor;
@@ -33,9 +32,19 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AdminCMCData {
 
-  /** Type of admin request */
+  /**
+   * Type of admin request
+   *
+   * @param adminRequestType admin request type
+   * @return admin request type
+   */
   private AdminRequestType adminRequestType;
-  /** Admin request/response data */
+  /**
+   * Admin request/response data
+   *
+   * @param data data
+   * @return data
+   */
   private String data;
 
 }

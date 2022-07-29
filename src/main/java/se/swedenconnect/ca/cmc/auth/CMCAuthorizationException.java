@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021. Agency for Digital Government (DIGG)
+ * Copyright 2021-2022 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package se.swedenconnect.ca.cmc.auth;
 
 /**
- * Description
+ * Exception related to CMC authorization decisions.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCAuthorizationException extends Exception {
+public class CMCAuthorizationException extends RuntimeException {
+
+  private static final long serialVersionUID = -2749871697534432294L;
+
+  /**
+   * Constructor
+   */
   public CMCAuthorizationException() {
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   */
   public CMCAuthorizationException(String message) {
     super(message);
   }
 
+  /**
+   *
+   * @param message message
+   * @param cause cause
+   */
   public CMCAuthorizationException(String message, Throwable cause) {
     super(message, cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param cause cause
+   */
   public CMCAuthorizationException(Throwable cause) {
     super(cause);
   }
 
+  /**
+   * Constructor
+   *
+   * @param message message
+   * @param cause cause
+   * @param enableSuppression enable suppression
+   * @param writableStackTrace writable stack trace
+   */
   public CMCAuthorizationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }
