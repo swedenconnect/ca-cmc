@@ -8,6 +8,21 @@ Core functions for managing a remote CA via CMC
 
 ____
 
+## Maven
+
+Add this maven dependency to your project
+
+```
+<dependency>
+    <groupId>se.swedenconnect.ca</groupId>
+    <artifactId>cmc/artifactId>
+    <version>${ca-cmc.version}</version>
+</dependency>
+```
+
+##### API documentation
+
+## CMC Implementation
 This is an implementation of a CMC API for the CA engine with a narrowed scope to provide the essential functions of the CA via an open restful API.
 
 This CMC implementation supports two classes of requests:
@@ -17,8 +32,8 @@ This CMC implementation supports two classes of requests:
 
 The main difference between these classes of requests is that the request from an authorized RA relies purely on standard CMC request and response data defined in RFC 5272 while requests for additional administrative operations makes use of custom request and response data objects defined for this implementation profile.
 
-## Response and request syntax
-### Generic request and response syntax
+### Response and request syntax
+#### Generic request and response syntax
 
 This implementation of CMC is based on full PKI requests and full PKI responses only. All requests and responses have the form of CMS signatures carrying a CMC request or response data according to RFC 5272.
 
@@ -49,7 +64,7 @@ The following control attributes are used in responses:
 All control attributes above are defined in RFC 5272.
 
 
-### Requests from authorized RA
+#### Requests from authorized RA
 
 Standard requests from an authorized RA is limited to the following functions:
 
@@ -59,7 +74,7 @@ Standard requests from an authorized RA is limited to the following functions:
 
 The reason for this set of functions is that the scope of this implementation is limited to a specific use case where the RA acts as the exclusive entity that is authorized to request or revoke certificates on behalf of certificate subjects. The certificate subject has no direct contact with the CA in this scenario. As such we eliminate all need for a state machine and callback scenarios with multiple entities where for example one entity requests the certificate and another entity approves the certificate or similar. This reduces the protocol to a simple request/response protocol where the result is delivered directly as a response to any supported request.
 
-#### Certificate requests
+##### Certificate requests
 
 Certificate requests makes use of one of the following request formats:
 
@@ -72,17 +87,17 @@ In all other cases where the RA can't provide a PKCS#10 request signed by the ce
 
 Responses to a successful certificate request is provided in a signed PKIResponse object. The certificate that was issued, if any, is provided among the CMS certificates as defined in RFC 5272.
 
-#### Revocation requests
+##### Revocation requests
 
 Revocation requests make use of the revokeRequest control attribute, specifying the issuer name, certificate serial number of the certificate to revoke, reason code and revocation date.
 
 Successful revocation status is delivered in the response using the statusInfoV2 control attribute.
 
-#### Get cert requests
+##### Get cert requests
 
 The GetCert request makes use of the getCert control attribute to specify the issuer and the certificate serial number of the certificate to return. Returned certificate is included in the response exactly in the same way as when certificates are issued. i.e., in the set of certificates in the CMS SingedData structure.
 
-### Request for administrative operations
+#### Request for administrative operations
 
 All requests for administrative operations make use of the regInfo control attribute to hold custom request data and uses the responseInfo control attribute to return data in responses related to these custom requests.
 
@@ -114,7 +129,7 @@ The following table illustrate what data objects that are passed as request and 
 | listCerts        | se.swedenconnect.ca.cmc.model.admin.request.ListCerts | List&lt;se.swedenconnect.ca.cmc.model.admin.response.CertificateData> |
 | allCertSerials   | absent                                                | List&lt;String> (Serialnumbers as hex strings)                        |
 
-## CMC API
+## Java API
 
 This CMC API integration library provides java classes that can be used by both the client and the CA to implement this API.
 
