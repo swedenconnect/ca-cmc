@@ -2,7 +2,7 @@
 
 # CMC API for Certification Authority integration
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-cmc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/ca-cmc)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/cmc/badge.svg)](https://maven-badges.herokuapp.com/maven-central/se.swedenconnect.ca/cmc)
 
 Core functions for managing a remote CA via CMC
 
