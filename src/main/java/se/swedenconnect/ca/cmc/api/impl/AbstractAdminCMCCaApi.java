@@ -24,6 +24,7 @@ import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
 import se.swedenconnect.ca.cmc.model.admin.request.ListCerts;
 import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
 import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
@@ -68,7 +69,10 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
 
     switch (adminRequestType) {
     case caInfo:
-      responseInfo = getCAinfoResponse();
+      responseInfo = getCAInfoResponse();
+      break;
+    case staticCaInfo:
+      responseInfo = getStaticCAInfoResponse();
       break;
     case listCerts:
       ListCerts listCertsReqeust = CMCUtils.OBJECT_MAPPER.readValue(adminRequest.getData(), ListCerts.class);
@@ -119,7 +123,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
     return CMCUtils.OBJECT_MAPPER.writeValueAsString(certificateDataList);
   }
 
-  private String getCAinfoResponse() throws Exception {
+  private String getCAInfoResponse() throws Exception {
     CARepository caRepository = caService.getCaRepository();
     CAInformation caInformation = CAInformation.builder()
       .validCertificateCount(caRepository.getCertificateCount(true))
@@ -134,4 +138,20 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
       .build();
     return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
   }
+
+  private String getStaticCAInfoResponse() throws Exception {
+    StaticCAInformation caInformation = StaticCAInformation.builder()
+      .certificateChain(CMCUtils.getCerHolderByteList(caService.getCACertificateChain()))
+      .ocspCertificate(caService.getOCSPResponderCertificate() != null
+        ? caService.getOCSPResponderCertificate().getEncoded()
+        : null)
+      .caAlgorithm(caService.getCaAlgorithm())
+      .ocspResponserUrl(caService.getOCSPResponderURL())
+      .crlDpURLs(caService.getCrlDpURLs())
+      .build();
+    return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
+  }
+
+
+
 }

@@ -18,6 +18,7 @@ package se.swedenconnect.ca.cmc;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.asn1.cmc.BodyPartID;
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
 import org.bouncycastle.asn1.x509.CRLReason;
@@ -26,6 +27,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
 import se.swedenconnect.ca.cmc.api.*;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
@@ -203,6 +205,15 @@ public class CMCTests {
     log.info("Parsed Admin request - CA Info:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
     CMCDataValidator.validateCMCRequest(cmcParsed, requestModel);
 
+    //Create CMC Admin request - Static CA Info
+    requestModel = new CMCAdminRequestModel(CMCRequestData.adminRequestMap.get(CMCRequestData.STATIC_CA_INFO));
+    cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
+    log.info("CMC Admin request - Static CA Info:\n{}", CMCDataPrint.printCMCRequest(cmcRequest, true, true));
+    CMCDataValidator.validateCMCRequest(cmcRequest, requestModel);
+    cmcParsed = cmcRequestParser.parseCMCrequest(cmcRequest.getCmcRequestBytes());
+    log.info("Parsed Admin request - Static CA Info:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
+    CMCDataValidator.validateCMCRequest(cmcParsed, requestModel);
+
     //Create CMC Admin request - list certs
     requestModel = new CMCAdminRequestModel(CMCRequestData.adminRequestMap.get(CMCRequestData.LIST_CERTS));
     cmcRequest = cmcRequestFactory.getCMCRequest(requestModel);
@@ -291,6 +302,24 @@ public class CMCTests {
         .build());
     cmcResponse = cmcResponseFactory.getCMCResponse(responseModel);
     log.info("CMC CA info response:\n{}", CMCDataPrint.printCMCResponse(cmcResponse, true));
+    CMCDataValidator.validateCMCResponse(cmcResponse, responseModel);
+    cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), cmcRequestType);
+    log.info("Parsed CA info response:\n{}", CMCDataPrint.printCMCResponse(cmcParsed, false));
+    CMCDataValidator.validateCMCResponse(cmcParsed, responseModel);
+
+    cmcRequestType = CMCRequestType.admin;
+    responseModel = new CMCAdminResponseModel(nonce, TestResponseStatus.success.withBodyParts(processedObjects), cmcRequestType,
+      AdminCMCData.builder()
+        .adminRequestType(AdminRequestType.staticCaInfo)
+        .data(CMCUtils.OBJECT_MAPPER.writeValueAsString(StaticCAInformation.builder()
+          .certificateChain(List.of(ca.getCaCertificate().getEncoded()))
+            .ocspResponserUrl("http://example.com/ocsp-responder")
+            .crlDpURLs(List.of("http://example.com/crl1","http://example.com/crl2"))
+            .caAlgorithm(XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA256)
+          .build()))
+        .build());
+    cmcResponse = cmcResponseFactory.getCMCResponse(responseModel);
+    log.info("CMC Static CA info response:\n{}", CMCDataPrint.printCMCResponse(cmcResponse, true));
     CMCDataValidator.validateCMCResponse(cmcResponse, responseModel);
     cmcParsed = cmcResponseParser.parseCMCresponse(cmcResponse.getCmcResponseBytes(), cmcRequestType);
     log.info("Parsed CA info response:\n{}", CMCDataPrint.printCMCResponse(cmcParsed, false));

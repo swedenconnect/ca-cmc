@@ -33,6 +33,7 @@ import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
 import se.swedenconnect.ca.cmc.model.admin.request.ListCerts;
 import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
 import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.request.impl.CMCAdminRequestModel;
@@ -169,6 +170,11 @@ public class CMCDataValidator {
           throw new IOException("Illegal admin request data for ca info request - Expected null");
         }
         break;
+      case staticCaInfo:
+        if (adminCMCData.getData() != null) {
+          throw new IOException("Illegal static admin request data for ca info request - Expected null");
+        }
+        break;
       case allCertSerials:
         if (adminCMCData.getData() != null) {
           throw new IOException("Illegal admin request data for all cert serial request - Expected null");
@@ -282,6 +288,18 @@ public class CMCDataValidator {
         }
         if (modelCaInformation.getValidCertificateCount() != caInformation.getValidCertificateCount()) {
           throw new IOException("Valid certificate count mismatch");
+        }
+        break;
+      case staticCaInfo:
+        StaticCAInformation staticCAInformation = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), StaticCAInformation.class);
+        StaticCAInformation modelStaticCaInformation = CMCUtils.OBJECT_MAPPER.readValue(modelAdminCMCData.getData(), StaticCAInformation.class);
+        if (staticCAInformation.getCertificateChain().size() != modelStaticCaInformation.getCertificateChain().size()) {
+          throw new IOException("CA chain size mismatch");
+        }
+        if (modelStaticCaInformation.getOcspCertificate() != null) {
+          if (!Arrays.equals(modelStaticCaInformation.getOcspCertificate(), staticCAInformation.getOcspCertificate())) {
+            throw new IOException("OCSP certificate mismatch");
+          }
         }
         break;
       case listCerts:
