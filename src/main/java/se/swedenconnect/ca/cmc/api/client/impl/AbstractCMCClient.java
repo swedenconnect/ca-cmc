@@ -71,21 +71,36 @@ import java.util.List;
 @Slf4j
 public abstract class AbstractCMCClient implements CMCClient {
 
+  /** JSON data object mapper */
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  protected final CMCRequestFactory cmcRequestFactory;
-  protected final CMCResponseParser cmcResponseParser;
+  /** {@inheritDoc} */
+  @Setter protected int connectTimeout = 1000;
+  /** {@inheritDoc} */
+  @Setter protected int readTimeout = 5000;
+  /** {@inheritDoc} */
+  @Setter protected int timeSkew = 60000;
+  /** {@inheritDoc} */
+  @Setter protected int maxAge = 60000;
+  /** {@inheritDoc} */
+  @Setter protected int caInfoMaxAge = 600000;
+  /** {@inheritDoc} */
+  @Setter protected CMCClientHttpConnector cmcClientHttpConnector;
+
+  /** Cached CA information */
   protected CAInformation cachedCAInformation;
+  /** Time when last CA information was cached */
   protected Date lastCAInfoRecache;
+
+  /** CMC request factory */
+  protected final CMCRequestFactory cmcRequestFactory;
+  /** CMC response parser */
+  protected final CMCResponseParser cmcResponseParser;
+  /** CMC Request URL where CMC requests are sent */
   protected final URL cmcRequestUrl;
+  /** CA issuer certificate */
   protected final X509Certificate caCertificate;
 
-  @Setter protected int connectTimeout = 1000;
-  @Setter protected int readTimeout = 5000;
-  @Setter protected int timeSkew = 60000;
-  @Setter protected int maxAge = 60000;
-  @Setter protected int caInfoMaxAge = 600000;
-  @Setter protected CMCClientHttpConnector cmcClientHttpConnector;
 
   /**
    * Constructor for the CMC Client
@@ -267,6 +282,12 @@ public abstract class AbstractCMCClient implements CMCClient {
     return getCMCResponse(cmcRequest);
   }
 
+  /**
+   * Send a CMC request and obtain the corresponding CMC response
+   * @param cmcRequest CMC request
+   * @return CMC response
+   * @throws IOException error sending or processing CMC request or response
+   */
   protected CMCResponse getCMCResponse(CMCRequest cmcRequest) throws IOException {
 
     CMCHttpResponseData httpResponseData = cmcClientHttpConnector.sendCmcRequest(cmcRequest.getCmcRequestBytes(), cmcRequestUrl, connectTimeout, readTimeout);
@@ -298,7 +319,7 @@ public abstract class AbstractCMCClient implements CMCClient {
 
   }
 
-  protected X509CertificateHolder getCertificateHolder(X509Certificate caCertificate) throws IOException {
+  private X509CertificateHolder getCertificateHolder(X509Certificate caCertificate) throws IOException {
     try {
       return new JcaX509CertificateHolder(caCertificate);
     }
@@ -306,7 +327,5 @@ public abstract class AbstractCMCClient implements CMCClient {
       throw new IOException(e);
     }
   }
-
-
 
 }

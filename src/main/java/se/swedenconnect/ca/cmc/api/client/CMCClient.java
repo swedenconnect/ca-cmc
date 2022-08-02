@@ -125,44 +125,44 @@ public interface CMCClient {
     boolean includeCrlDPs, boolean includeOcspURL) throws IOException;
 
   /**
-   * HTTP connect timeout in milliseconds
+   * Set HTTP connect timeout in milliseconds.
    *
-   * @param connectTimeout
+   * @param connectTimeout HTTP connect timeout in milliseconds
    */
   void setConnectTimeout(int connectTimeout);
 
   /**
-   * HTTP read timeout in milliseconds
+   * Set HTTP read timeout in milliseconds.
    *
-   * @param readTimeout
+   * @param readTimeout HTTP read timeout in milliseconds
    */
   void setReadTimeout(int readTimeout);
 
   /**
-   * Max time skew in milliseconds allowed between client and server
+   * Set Max time skew in milliseconds allowed between client and server.
    *
-   * @param timeSkew
+   * @param timeSkew max time skew in milliseconds
    */
   void setTimeSkew(int timeSkew);
 
   /**
-   * Max age in milliseconds for an acceptable CMC response (time skew will be added to this time)
+   * Set Max age in milliseconds for an acceptable CMC response (time skew will be added to this time).
    *
-   * @param maxAge
+   * @param maxAge max age in milliseconds
    */
   void setMaxAge(int maxAge);
 
   /**
-   * CA information max age in milliseconds before a re-cache is forced
+   * Set CA information max age in milliseconds before a re-cache is forced
    *
-   * @param caInfoMaxAge
+   * @param caInfoMaxAge CA information max age in milliseconds
    */
   void setCaInfoMaxAge(int caInfoMaxAge);
 
   /**
    * Set a custom {@link CMCClientHttpConnector}. A default CMC client HTTP connector will be configured if none is set.
    *
-   * @param cmcClientHttpConnector
+   * @param cmcClientHttpConnector CMC client HTTP connector
    */
   void setCmcClientHttpConnector(CMCClientHttpConnector cmcClientHttpConnector);
 
