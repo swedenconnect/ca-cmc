@@ -24,6 +24,8 @@ package se.swedenconnect.ca.cmc.model.admin;
 public enum AdminRequestType {
   /** Request for information about the responding CA */
   caInfo,
+  /** Request for static information about the responding CA */
+  staticCaInfo,
   /** Request to obtain a list of issued certificates from the CA */
   listCerts,
   /** Request to obtain a list of all current certificate serial numbers of certificates in the CA database */

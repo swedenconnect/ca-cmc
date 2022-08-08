@@ -45,6 +45,7 @@ public class CMCRequestData {
   public static final String CRMF_USER = "User5";
   public static final String LIST_CERTS = "listCerts";
   public static final String CA_INFO = "caInfo";
+  public static final String STATIC_CA_INFO = "staticCaInfo";
   public static final String LIST_CERT_SERIALS = "listSerials";
 
   public static Map<String, CertNameModel> subjectMap;
@@ -101,6 +102,7 @@ public class CMCRequestData {
             .build()))
         .build());
       adminRequestMap.put(CA_INFO, AdminCMCData.builder().adminRequestType(AdminRequestType.caInfo).build());
+      adminRequestMap.put(STATIC_CA_INFO, AdminCMCData.builder().adminRequestType(AdminRequestType.staticCaInfo).build());
       adminRequestMap.put(LIST_CERT_SERIALS, AdminCMCData.builder().adminRequestType(AdminRequestType.allCertSerials).build());
 
     }

@@ -51,4 +51,9 @@ public class CMCRequest {
   /** The PKIData structure of this CMC request */
   private PKIData pkiData;
 
+  /**
+   * This class declaration will be replaced by Lombok
+   */
+  public static class CMCRequestBuilder{}
+
 }
