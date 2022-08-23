@@ -15,26 +15,23 @@
  */
 package se.swedenconnect.ca.cmc.api;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
-import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
-import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AuthorityKeyIdentifierModel;
-import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.SubjectKeyIdentifierModel;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
-import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBuilder;
-import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.util.List;
+
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.AuthorityKeyIdentifierModel;
+import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.simple.SubjectKeyIdentifierModel;
+import se.swedenconnect.ca.engine.ca.models.cert.impl.AbstractCertificateModelBuilder;
+import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
 /**
  * Default certificate model builder implementation
@@ -47,20 +44,25 @@ public class CMCCertificateModelBuilder extends AbstractCertificateModelBuilder<
 
   /** Subject public key */
   private final PublicKey publicKey;
+
   /** Certificate of the issuer */
   private final X509CertificateHolder issuer;
-  /** Algorithm used by the CA to sign certificates. This is used to identify the hash algorithm used to hash key identifiers */
+
+  /**
+   * Algorithm used by the CA to sign certificates. This is used to identify the hash algorithm used to hash key
+   * identifiers
+   */
   private final String caAlgorithm;
 
   /**
    * Private constructor
    *
-   * @param publicKey   subject public key
-   * @param issuer      issuer certificate
+   * @param publicKey subject public key
+   * @param issuer issuer certificate
    * @param caAlgorithm certificate signing algorithm
    */
-  private CMCCertificateModelBuilder(PublicKey publicKey, X509CertificateHolder issuer,
-    String caAlgorithm) {
+  private CMCCertificateModelBuilder(
+      final PublicKey publicKey, final X509CertificateHolder issuer, final String caAlgorithm) {
     this.publicKey = publicKey;
     this.issuer = issuer;
     this.caAlgorithm = caAlgorithm;
@@ -69,58 +71,50 @@ public class CMCCertificateModelBuilder extends AbstractCertificateModelBuilder<
   /**
    * Creates an instance of this certificate model builder
    *
-   * @param publicKey   subject public key
-   * @param issuer      issuer certificate
+   * @param publicKey subject public key
+   * @param issuer issuer certificate
    * @param caAlgorithm certificate signing algorithm
    * @return certificate model builder
    */
-  public static CMCCertificateModelBuilder getInstance(PublicKey publicKey, X509CertificateHolder issuer,
-    String caAlgorithm) {
+  public static CMCCertificateModelBuilder getInstance(
+      final PublicKey publicKey, final X509CertificateHolder issuer, final String caAlgorithm) {
     return new CMCCertificateModelBuilder(publicKey, issuer, caAlgorithm);
   }
 
-  @Override public CertificateModel build() throws CertificateIssuanceException {
-    try {
-      return CertificateModel.builder()
-        .publicKey(publicKey)
-        .subject(getSubject())
-        .extensionModels(getExtensionModels())
-        .build();
-    }
-    catch (Exception ex) {
-      throw new CertificateIssuanceException("Failed to prepare certificate data", ex);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected PublicKey getPublicKey() {
+    return this.publicKey;
   }
 
   @Override
-  protected void getKeyIdentifierExtensionsModels(List<ExtensionModel> extm) throws IOException {
+  protected void getKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
 
-    //Authority key identifier
-    if (includeAki) {
+    // Authority key identifier
+    if (this.includeAki) {
       AuthorityKeyIdentifierModel akiModel = null;
       try {
-        byte[] kidVal = SubjectKeyIdentifier.getInstance(issuer.getExtension(Extension.subjectKeyIdentifier).getParsedValue())
-          .getKeyIdentifier();
+        final byte[] kidVal =
+            SubjectKeyIdentifier.getInstance(this.issuer.getExtension(Extension.subjectKeyIdentifier).getParsedValue())
+                .getKeyIdentifier();
         if (kidVal != null && kidVal.length > 0) {
           akiModel = new AuthorityKeyIdentifierModel(new AuthorityKeyIdentifier(kidVal));
         }
       }
-      catch (Exception ignored) {
+      catch (final Exception ignored) {
       }
 
       if (akiModel == null) {
         akiModel = new AuthorityKeyIdentifierModel(new AuthorityKeyIdentifier(
-          getSigAlgoMessageDigest(caAlgorithm).digest(issuer.getSubjectPublicKeyInfo().getEncoded())
-        ));
+            this.getSigAlgoMessageDigest(this.caAlgorithm).digest(this.issuer.getSubjectPublicKeyInfo().getEncoded())));
       }
       extm.add(akiModel);
     }
 
     // Subject key identifier
-    if (includeSki) {
+    if (this.includeSki) {
       extm.add(new SubjectKeyIdentifierModel(
-        getSigAlgoMessageDigest(caAlgorithm).digest(publicKey.getEncoded())
-      ));
+          this.getSigAlgoMessageDigest(this.caAlgorithm).digest(this.publicKey.getEncoded())));
     }
 
   }
@@ -130,12 +124,12 @@ public class CMCCertificateModelBuilder extends AbstractCertificateModelBuilder<
    *
    * @return message digest instance
    */
-  private MessageDigest getSigAlgoMessageDigest(String algorithm) {
+  private MessageDigest getSigAlgoMessageDigest(final String algorithm) {
     MessageDigest messageDigestInstance = null;
     try {
       messageDigestInstance = CAAlgorithmRegistry.getMessageDigestInstance(algorithm);
     }
-    catch (NoSuchAlgorithmException e) {
+    catch (final NoSuchAlgorithmException e) {
       log.error("Illegal configured signature algorithm prevents retrieval of signature algorithm digest algorithm", e);
     }
     return messageDigestInstance;
