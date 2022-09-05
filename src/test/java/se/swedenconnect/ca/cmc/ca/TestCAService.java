@@ -37,10 +37,12 @@ import se.swedenconnect.ca.engine.revocation.crl.CRLIssuerModel;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.security.credential.PkiCredential;
 
 import java.io.File;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -62,16 +64,16 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
   private X509CertificateHolder ocspResponderCertificate;
   @Getter private String ocspResponderUrl;
 
-  public TestCAService(PrivateKey privateKey, List<X509CertificateHolder> caCertificateChain, CARepository caRepository,
+  public TestCAService(PkiCredential issuerCredential, CARepository caRepository,
     File crlFile, String algorithm) throws Exception {
-    super(caCertificateChain, caRepository);
+    super(issuerCredential, caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
-      new CertificateIssuerModel(algorithm, 10), getCaCertificate().getSubject(), privateKey);
+      new CertificateIssuerModel(algorithm, Duration.ofDays(3652)), issuerCredential);
     CRLIssuerModel crlIssuerModel = getCrlIssuerModel(getCaRepository().getCRLRevocationDataProvider(), algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, privateKey);
+      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, issuerCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
       publishNewCrl();
     }
@@ -81,7 +83,7 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
     throws CertificateRevocationException {
     try {
       return new CRLIssuerModel(getCaCertificate(), algorithm,
-        2, crlRevocationDataProvider, TestCAHolder.getFileUrl(crlFile));
+        Duration.ofHours(2), crlRevocationDataProvider, TestCAHolder.getFileUrl(crlFile));
     }
     catch (Exception e) {
       throw new CertificateRevocationException(e);

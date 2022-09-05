@@ -88,7 +88,7 @@ public class CMCCertificateModelBuilder extends AbstractCertificateModelBuilder<
   }
 
   @Override
-  protected void getKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
+  protected void addKeyIdentifierExtensionsModels(final List<ExtensionModel> extm) throws IOException {
 
     // Authority key identifier
     if (this.includeAki) {

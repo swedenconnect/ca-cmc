@@ -38,11 +38,16 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.SelfIssuedCertificateModel
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPModel;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.ca.engine.revocation.ocsp.impl.RepositoryBasedOCSPResponder;
+import se.swedenconnect.ca.engine.utils.CAUtils;
+import se.swedenconnect.security.credential.BasicCredential;
+import se.swedenconnect.security.credential.PkiCredential;
+import se.swedenconnect.sigval.cert.utils.CertUtils;
 
 import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,7 +91,7 @@ public class TestCAHolder {
     // generate key and root CA cert
     CertificateIssuer certificateIssuer = new SelfIssuedCertificateIssuer(new CertificateIssuerModel(
       caConfig.getCaAlgo(),
-      20
+      Duration.ofDays(20 * 365 + 5)
     ));
 
     log.info("Generating root ca key for {}", caConfig.getId());
@@ -102,7 +107,8 @@ public class TestCAHolder {
     X509CertificateHolder rootCA01Cert = certificateIssuer.issueCertificate(builder.build());
     File crlFile = new File(dataDir, caConfig.getId() + "/root-ca.crl");
 
-    return new TestCAService(kp.getPrivate(), Arrays.asList(rootCA01Cert), new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
+    PkiCredential issuerCredential = new BasicCredential(CAUtils.getCertList(List.of(rootCA01Cert)), kp.getPrivate());
+    return new TestCAService(issuerCredential, new TestCARepository(crlFile), crlFile, caConfig.getCaAlgo());
   }
 
   private CertNameModel getCAName(String commonName) {
@@ -157,8 +163,9 @@ public class TestCAHolder {
           cscaService.getCaCertificate());
       }
 
-      OCSPModel ocspModel = new OCSPModel(ocspServiceChain, cscaService.getCaCertificate(), algorithm);
-      OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(kp.getPrivate(), ocspModel, cscaService.getCaRepository());
+      PkiCredential pkiCredential = new BasicCredential(CAUtils.getCertList(ocspServiceChain), kp.getPrivate());
+      OCSPModel ocspModel = new OCSPModel(cscaService.getCaCertificate(), algorithm);
+      OCSPResponder ocspResponder = new RepositoryBasedOCSPResponder(pkiCredential, ocspModel, cscaService.getCaRepository());
       cscaService.setOcspResponder(ocspResponder, "https://example.com/" + caConfig.getId() + "/ocsp", ocspServiceChain.get(0));
     }
     catch (Exception ex) {
