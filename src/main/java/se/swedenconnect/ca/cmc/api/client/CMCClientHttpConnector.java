@@ -34,6 +34,7 @@ public interface CMCClientHttpConnector {
    * @param readTimeout the timeout for reading http data specified in milliseconds
    * @return response data
    */
-  CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl, final int connectTimeout, final int readTimeout);
+  CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl,
+      final int connectTimeout, final int readTimeout);
 
 }

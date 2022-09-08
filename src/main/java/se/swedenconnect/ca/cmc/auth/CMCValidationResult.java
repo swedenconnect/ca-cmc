@@ -15,16 +15,16 @@
  */
 package se.swedenconnect.ca.cmc.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
 
-import java.security.cert.X509Certificate;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Data class holding CMC validation data
@@ -40,16 +40,22 @@ public class CMCValidationResult {
 
   /** Indicates if the CMC message is valid and originates from an authorized source */
   private boolean valid;
+
   /** Indicates if the response is a simple response */
   private boolean simpleResponse;
+
   /** Holding the signed data structure of the CMC message */
   private CMSSignedData signedData;
+
   /** The content type of the CMS signature */
   private ASN1ObjectIdentifier contentType;
+
   /** The validated certificate path */
   private List<X509CertificateHolder> signerCertificatePath;
+
   /** Optional exception thrown during validation */
   private Exception exception;
+
   /** Optional error message */
   private String errorMessage;
 

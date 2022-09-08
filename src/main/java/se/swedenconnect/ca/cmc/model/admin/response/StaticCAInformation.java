@@ -15,15 +15,15 @@
  */
 package se.swedenconnect.ca.cmc.model.admin.response;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
- * Data class for information about the CA providing this CMC API
+ * Data class for information about the CA providing this CMC API.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -34,15 +34,19 @@ import java.util.List;
 @Builder
 public class StaticCAInformation {
 
-  /** The CA certificate chain */
-  List<byte[]> certificateChain;
-  /** The optional OCSP certificate used by the OCSP responder of this CA */
-  byte[] ocspCertificate;
-  /** The location of the CRL of this CA service */
-  List<String> crlDpURLs;
-  /** The URL to the OCSP responder of this CA if present */
-  String ocspResponserUrl;
-  /** The algorithm used by this CA to sign certificates */
-  String caAlgorithm;
+  /** The CA certificate chain. */
+  private List<byte[]> certificateChain;
+
+  /** The optional OCSP certificate used by the OCSP responder of this CA. */
+  private byte[] ocspCertificate;
+
+  /** The location of the CRL of this CA service. */
+  private List<String> crlDpURLs;
+
+  /** The URL to the OCSP responder of this CA if present. */
+  private String ocspResponserUrl;
+
+  /** The algorithm used by this CA to sign certificates. */
+  private String caAlgorithm;
 
 }

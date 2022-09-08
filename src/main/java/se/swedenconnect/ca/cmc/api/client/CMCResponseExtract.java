@@ -15,9 +15,15 @@
  */
 package se.swedenconnect.ca.cmc.api.client;
 
+import java.util.List;
+
+import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
+
+import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
@@ -28,11 +34,8 @@ import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
-import java.io.IOException;
-import java.util.List;
-
 /**
- * Providing a set of static CMC response data extraction functions
+ * Providing a set of static CMC response data extraction functions.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -47,14 +50,15 @@ public class CMCResponseExtract {
    *
    * @param cmcResponse CMC response
    * @return {@link AdminCMCData}
-   * @throws IOException error parsing CMC response
+   * @throws CMCMessageException error parsing CMC response
    */
-  public static AdminCMCData getAdminCMCData (CMCResponse cmcResponse) throws IOException {
-    if (!cmcResponse.getCmcRequestType().equals(CMCRequestType.admin)){
-      throw new IOException("Not an admin response");
+  public static AdminCMCData getAdminCMCData(final CMCResponse cmcResponse) throws CMCMessageException {
+    if (!cmcResponse.getCmcRequestType().equals(CMCRequestType.admin)) {
+      throw new CMCMessageException("Not an admin response");
     }
-    final CMCControlObject cmcControlObject = CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo, cmcResponse.getPkiResponse());
-    AdminCMCData adminCMCData = (AdminCMCData) cmcControlObject.getValue();
+    final CMCControlObject cmcControlObject =
+        CMCUtils.getCMCControlObject(CMCObjectIdentifiers.id_cmc_responseInfo, cmcResponse.getPkiResponse());
+    final AdminCMCData adminCMCData = (AdminCMCData) cmcControlObject.getValue();
     return adminCMCData;
   }
 
@@ -63,15 +67,22 @@ public class CMCResponseExtract {
    *
    * @param cmcResponse CMC response
    * @return list of certificate data
-   * @throws IOException error parsing CMC response
+   * @throws CMCMessageException error parsing CMC response
    */
-  public static List<CertificateData> extractCertificateData(CMCResponse cmcResponse) throws IOException {
-    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
-    if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.listCerts)){
-      throw new IOException("Not a list certificates response");
+  public static List<CertificateData> extractCertificateData(final CMCResponse cmcResponse) throws CMCMessageException {
+    try {
+      final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
+      if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.listCerts)) {
+        throw new CMCMessageException("Not a list certificates response");
+      }
+      final List<CertificateData> certificateDataList =
+          OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {
+          });
+      return certificateDataList;
     }
-    List<CertificateData> certificateDataList = OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
-    return certificateDataList;
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Failed to extract certificate data", e);
+    }
   }
 
   /**
@@ -79,15 +90,20 @@ public class CMCResponseExtract {
    *
    * @param cmcResponse CMC response
    * @return {@link CAInformation}
-   * @throws IOException error parsing the CMC response
+   * @throws CMCMessageException error parsing the CMC response
    */
-  public static CAInformation extractCAInformation(CMCResponse cmcResponse) throws IOException {
-    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
-    if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.caInfo)){
-      throw new IOException("Not a CA information response");
+  public static CAInformation extractCAInformation(final CMCResponse cmcResponse) throws CMCMessageException {
+    try {
+      final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
+      if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.caInfo)) {
+        throw new CMCMessageException("Not a CA information response");
+      }
+      final CAInformation caInformation = OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
+      return caInformation;
     }
-    CAInformation caInformation = OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
-    return caInformation;
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Failed to extract CA information from CMC response", e);
+    }
   }
 
   /**
@@ -95,15 +111,22 @@ public class CMCResponseExtract {
    *
    * @param cmcResponse CMC response
    * @return {@link CAInformation}
-   * @throws IOException error parsing the CMC response
+   * @throws CMCMessageException error parsing the CMC response
    */
-  public static StaticCAInformation extractStaticCAInformation(CMCResponse cmcResponse) throws IOException {
-    final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
-    if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.staticCaInfo)){
-      throw new IOException("Not a static CA information response");
+  public static StaticCAInformation extractStaticCAInformation(final CMCResponse cmcResponse)
+      throws CMCMessageException {
+    try {
+      final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
+      if (!adminCMCData.getAdminRequestType().equals(AdminRequestType.staticCaInfo)) {
+        throw new CMCMessageException("Not a static CA information response");
+      }
+      final StaticCAInformation caInformation =
+          OBJECT_MAPPER.readValue(adminCMCData.getData(), StaticCAInformation.class);
+      return caInformation;
     }
-    StaticCAInformation caInformation = OBJECT_MAPPER.readValue(adminCMCData.getData(), StaticCAInformation.class);
-    return caInformation;
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Failed to extract static CA information from CMC response", e);
+    }
   }
 
 }

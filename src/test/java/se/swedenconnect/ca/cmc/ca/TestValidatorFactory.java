@@ -15,34 +15,6 @@
  */
 package se.swedenconnect.ca.cmc.ca;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ocsp.OCSPRequest;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cert.ocsp.CertificateID;
-import org.bouncycastle.cert.ocsp.OCSPReq;
-import org.bouncycastle.cert.ocsp.OCSPResp;
-import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.util.encoders.Base64;
-import se.swedenconnect.sigval.cert.chain.AbstractPathValidator;
-import se.swedenconnect.sigval.cert.chain.impl.CertificatePathValidator;
-import se.swedenconnect.sigval.cert.chain.impl.CertificatePathValidatorFactory;
-import se.swedenconnect.sigval.cert.chain.impl.CertificateValidityCheckerFactory;
-import se.swedenconnect.sigval.cert.chain.impl.StatusCheckingCertificateValidatorImpl;
-import se.swedenconnect.sigval.cert.validity.CertificateValidityChecker;
-import se.swedenconnect.sigval.cert.validity.crl.CRLCache;
-import se.swedenconnect.sigval.cert.validity.crl.impl.CRLCacheImpl;
-import se.swedenconnect.sigval.cert.validity.crl.impl.CRLDataLoader;
-import se.swedenconnect.sigval.cert.validity.impl.BasicCertificateValidityChecker;
-import se.swedenconnect.sigval.cert.validity.ocsp.OCSPCertificateVerifier;
-import se.swedenconnect.sigval.cert.validity.ocsp.OCSPDataLoader;
-import se.swedenconnect.ca.cmc.utils.TestUtils;
-import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
-
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
@@ -58,6 +30,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ocsp.OCSPRequest;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.cert.ocsp.CertificateID;
+import org.bouncycastle.cert.ocsp.OCSPReq;
+import org.bouncycastle.cert.ocsp.OCSPResp;
+import org.bouncycastle.operator.DigestCalculator;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
+import org.bouncycastle.util.encoders.Base64;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import se.swedenconnect.ca.cmc.utils.TestUtils;
+import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
+import se.swedenconnect.sigval.cert.chain.AbstractPathValidator;
+import se.swedenconnect.sigval.cert.chain.impl.CertificatePathValidator;
+import se.swedenconnect.sigval.cert.chain.impl.CertificatePathValidatorFactory;
+import se.swedenconnect.sigval.cert.chain.impl.CertificateValidityCheckerFactory;
+import se.swedenconnect.sigval.cert.chain.impl.StatusCheckingCertificateValidatorImpl;
+import se.swedenconnect.sigval.cert.validity.CertificateValidityChecker;
+import se.swedenconnect.sigval.cert.validity.crl.CRLCache;
+import se.swedenconnect.sigval.cert.validity.crl.impl.CRLCacheImpl;
+import se.swedenconnect.sigval.cert.validity.crl.impl.CRLDataLoader;
+import se.swedenconnect.sigval.cert.validity.impl.BasicCertificateValidityChecker;
+import se.swedenconnect.sigval.cert.validity.ocsp.OCSPCertificateVerifier;
+import se.swedenconnect.sigval.cert.validity.ocsp.OCSPDataLoader;
+
 /**
  * Providing certificate validator for certificates issued by a CA provider
  *
@@ -67,9 +68,9 @@ import java.util.Set;
 public class TestValidatorFactory {
 
   /**
-   * Creates and returns the components of a certificate validator. These components are the actual certificate validator and the CRL cache
-   * used by the certificate validator. The profiles regulate whether a certificate validator according the the profile should be responsive
-   * or not.
+   * Creates and returns the components of a certificate validator. These components are the actual certificate
+   * validator and the CRL cache used by the certificate validator. The profiles regulate whether a certificate
+   * validator according the the profile should be responsive or not.
    *
    * @param trustedCerts The list of trusted certificates trusted by this validator
    * @param profile profile determining the function of the validator
@@ -78,16 +79,17 @@ public class TestValidatorFactory {
    * @throws IOException On error
    * @throws CertificateException On error
    */
-  public static CertValidatorComponents getCertificateValidator(List<X509Certificate> trustedCerts, ValidatorProfile profile, boolean singleThreaded)
-    throws IOException, CertificateException {
+  public static CertValidatorComponents getCertificateValidator(List<X509Certificate> trustedCerts,
+      ValidatorProfile profile, boolean singleThreaded)
+      throws IOException, CertificateException {
 
     File crlCacheDir = new File(System.getProperty("user.dir"), "target/test/crl-cache");
     CRLCache crlCache = new CRLCacheImpl(crlCacheDir, 0, new TestCRLDataLoader(profile));
 
     StatusCheckingCertificateValidatorImpl certificateValidator = new StatusCheckingCertificateValidatorImpl(
-      crlCache, null, trustedCerts.toArray(new X509Certificate[0]));
+        crlCache, null, trustedCerts.toArray(new X509Certificate[0]));
     certificateValidator.setCertificatePathValidatorFactory(
-      new TestCertificatePathValidatorFactory(singleThreaded, profile));
+        new TestCertificatePathValidatorFactory(singleThreaded, profile));
     certificateValidator.setSingleThreaded(singleThreaded);
     return new CertValidatorComponents(certificateValidator, crlCache);
   }
@@ -101,9 +103,11 @@ public class TestValidatorFactory {
       this.profile = profile;
     }
 
-    @Override public AbstractPathValidator getPathValidator(X509Certificate targetCert, List<X509Certificate> chain,
-      List<TrustAnchor> trustAnchors, CertStore certStore, CRLCache crlCache) {
-      CertificatePathValidator pathValidator = new CertificatePathValidator(targetCert, chain, trustAnchors, certStore, crlCache);
+    @Override
+    public AbstractPathValidator getPathValidator(X509Certificate targetCert, List<X509Certificate> chain,
+        List<TrustAnchor> trustAnchors, CertStore certStore, CRLCache crlCache) {
+      CertificatePathValidator pathValidator =
+          new CertificatePathValidator(targetCert, chain, trustAnchors, certStore, crlCache);
       if (singleThreaded) {
         pathValidator.setSingleThreaded(true);
       }
@@ -122,35 +126,44 @@ public class TestValidatorFactory {
       this.profile = profile;
     }
 
-    @Override public CertificateValidityChecker getCertificateValidityChecker(X509Certificate certificate, X509Certificate issuer,
-      CRLCache crlCache, PropertyChangeListener... propertyChangeListeners) {
-      BasicCertificateValidityChecker validityChecker = new BasicCertificateValidityChecker(certificate, issuer, crlCache,
-        propertyChangeListeners);
+    @Override
+    public CertificateValidityChecker getCertificateValidityChecker(X509Certificate certificate, X509Certificate issuer,
+        CRLCache crlCache, PropertyChangeListener... propertyChangeListeners) {
+      BasicCertificateValidityChecker validityChecker =
+          new BasicCertificateValidityChecker(certificate, issuer, crlCache,
+              propertyChangeListeners);
       validityChecker.setSingleThreaded(true);
       validityChecker.getValidityCheckers().stream()
-        .filter(vc -> vc instanceof OCSPCertificateVerifier)
-        .map(vc -> (OCSPCertificateVerifier) vc)
-        .forEach(ocspCertificateVerifier -> ocspCertificateVerifier.setOcspDataLoader(new TestOCSPDataLoader(profile)));
+          .filter(vc -> vc instanceof OCSPCertificateVerifier)
+          .map(vc -> (OCSPCertificateVerifier) vc)
+          .forEach(
+              ocspCertificateVerifier -> ocspCertificateVerifier.setOcspDataLoader(new TestOCSPDataLoader(profile)));
       return validityChecker;
     }
   }
 
   public static class TestOCSPDataLoader implements OCSPDataLoader {
-    @Getter private String lastResponseB64;
-    @Setter private boolean enforceUrlMatch = true;
+    @Getter
+    private String lastResponseB64;
+    @Setter
+    private boolean enforceUrlMatch = true;
     private final ValidatorProfile profile;
 
     public TestOCSPDataLoader(ValidatorProfile profile) {
       this.profile = profile;
     }
 
-    @Override public OCSPResp requestOCSPResponse(String url, OCSPReq ocspReq, int connectTimeout, int readTimeout) throws IOException {
+    @Override
+    public OCSPResp requestOCSPResponse(String url, OCSPReq ocspReq, int connectTimeout, int readTimeout)
+        throws IOException {
       TestCAHolder caHolder = getTestCSCAService(ocspReq);
       TestCAService cscaService = caHolder.getCscaService();
       OCSPResponder ocspResponder = cscaService.getOCSPResponder();
       if (cscaService.getOCSPResponderURL().equals(url) || !enforceUrlMatch) {
-        OCSPResp ocspResp = ocspResponder.handleRequest(
-          OCSPRequest.getInstance(new ASN1InputStream(ocspReq.getEncoded()).readObject()));
+        OCSPResp ocspResp;
+        try (final ASN1InputStream as = new ASN1InputStream(ocspReq.getEncoded())) {
+          ocspResp = ocspResponder.handleRequest(OCSPRequest.getInstance(as.readObject()));
+        }
         lastResponseB64 = Base64.toBase64String(ocspResp.getEncoded());
         switch (profile) {
         case NONE_RESPONSIVE:
@@ -170,9 +183,12 @@ public class TestValidatorFactory {
       Set<TestCA> testCAS = testCAHolderMap.keySet();
       for (TestCA testCa : testCAS) {
         TestCAHolder testCAHolder = testCAHolderMap.get(testCa);
-        X509Certificate issuer = TestUtils.getCertificate(testCAHolder.getCscaService().getCaCertificate().getEncoded());
-        DigestCalculator digestCalculator = new JcaDigestCalculatorProviderBuilder().build().get(CertificateID.HASH_SHA1);
-        CertificateID matchCertificateId = new CertificateID(digestCalculator, new JcaX509CertificateHolder(issuer), BigInteger.ONE);
+        X509Certificate issuer =
+            TestUtils.getCertificate(testCAHolder.getCscaService().getCaCertificate().getEncoded());
+        DigestCalculator digestCalculator =
+            new JcaDigestCalculatorProviderBuilder().build().get(CertificateID.HASH_SHA1);
+        CertificateID matchCertificateId =
+            new CertificateID(digestCalculator, new JcaX509CertificateHolder(issuer), BigInteger.ONE);
         if (matchCertId(certID, matchCertificateId)) {
           return testCAHolder;
         }
@@ -194,7 +210,8 @@ public class TestValidatorFactory {
       this.profile = profile;
     }
 
-    @Override public byte[] downloadCrl(String url, int connectTimeout, int readTimeout) throws IOException {
+    @Override
+    public byte[] downloadCrl(String url, int connectTimeout, int readTimeout) throws IOException {
       if (url.startsWith(TestCAHolder.FILE_URL_PREFIX)) {
         String urlEncodedPath = url.substring(TestCAHolder.FILE_URL_PREFIX.length());
         String filePath = URLDecoder.decode(urlEncodedPath, StandardCharsets.UTF_8);

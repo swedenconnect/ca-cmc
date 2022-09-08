@@ -15,8 +15,36 @@
  */
 package se.swedenconnect.ca.cmc.api;
 
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cmc.*;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERSet;
+import org.bouncycastle.asn1.cmc.BodyPartID;
+import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
+import org.bouncycastle.asn1.cmc.CertificationRequest;
+import org.bouncycastle.asn1.cmc.GetCert;
+import org.bouncycastle.asn1.cmc.OtherMsg;
+import org.bouncycastle.asn1.cmc.PKIData;
+import org.bouncycastle.asn1.cmc.RevokeRequest;
+import org.bouncycastle.asn1.cmc.TaggedAttribute;
+import org.bouncycastle.asn1.cmc.TaggedCertificationRequest;
+import org.bouncycastle.asn1.cmc.TaggedContentInfo;
+import org.bouncycastle.asn1.cmc.TaggedRequest;
 import org.bouncycastle.asn1.crmf.CertReqMsg;
 import org.bouncycastle.asn1.x509.CRLReason;
 import org.bouncycastle.asn1.x509.GeneralName;
@@ -26,6 +54,7 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessageBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
@@ -37,16 +66,6 @@ import se.swedenconnect.ca.cmc.model.request.impl.CMCRevokeRequestModel;
 import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 /**
  * This class provides the logic for creating CMC requests. This class is intended to be instantiated as a bean.
  *
@@ -57,8 +76,10 @@ public class CMCRequestFactory {
 
   /** Random source */
   private final static SecureRandom RNG = new SecureRandom();
+
   /** Signer certificate chain for signing CMC requests */
   private final List<X509Certificate> signerCertChain;
+
   /** A CMS Content signer used to sign CMC requests */
   private final ContentSigner signer;
 
@@ -68,7 +89,7 @@ public class CMCRequestFactory {
    * @param signerCertChain signer certificate chain for signing CMC requests
    * @param signer a CMS Content signer used to sign CMC requests
    */
-  public CMCRequestFactory(List<X509Certificate> signerCertChain, ContentSigner signer) {
+  public CMCRequestFactory(final List<X509Certificate> signerCertChain, final ContentSigner signer) {
     this.signerCertChain = signerCertChain;
     this.signer = signer;
   }
@@ -78,100 +99,103 @@ public class CMCRequestFactory {
    *
    * @param cmcRequestModel model holding the data necessary to create a CMC request
    * @return CMC Request
-   * @throws IOException on failure to create a valid CMC request
+   * @throws CMCMessageException on failure to create a valid CMC request
    */
-  public CMCRequest getCMCRequest(CMCRequestModel cmcRequestModel) throws IOException {
-    CMCRequest.CMCRequestBuilder requestBuilder = CMCRequest.builder();
-    CMCRequestType cmcRequestType = cmcRequestModel.getCmcRequestType();
-    Date messageTime = new Date();
+  public CMCRequest getCMCRequest(final CMCRequestModel cmcRequestModel) throws CMCMessageException {
+    final CMCRequest.CMCRequestBuilder requestBuilder = CMCRequest.builder();
+    final CMCRequestType cmcRequestType = cmcRequestModel.getCmcRequestType();
+    final Date messageTime = new Date();
     requestBuilder
-      .cmcRequestType(cmcRequestType)
-      .nonce(cmcRequestModel.getNonce());
+        .cmcRequestType(cmcRequestType)
+        .nonce(cmcRequestModel.getNonce());
     PKIData pkiData = null;
     try {
       switch (cmcRequestType) {
       case issueCert:
-        pkiData = createCertRequest((CMCCertificateRequestModel) cmcRequestModel, messageTime);
-        addCertRequestData(pkiData, requestBuilder);
+        pkiData = this.createCertRequest((CMCCertificateRequestModel) cmcRequestModel, messageTime);
+        this.addCertRequestData(pkiData, requestBuilder);
         break;
       case revoke:
-        pkiData = new PKIData(getCertRevocationControlSequence((CMCRevokeRequestModel) cmcRequestModel),
-          new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
+        pkiData = new PKIData(this.getCertRevocationControlSequence((CMCRevokeRequestModel) cmcRequestModel),
+            new TaggedRequest[] {}, new TaggedContentInfo[] {}, new OtherMsg[] {});
         break;
       case admin:
-        pkiData = createAdminRequest((CMCAdminRequestModel) cmcRequestModel);
+        pkiData = this.createAdminRequest((CMCAdminRequestModel) cmcRequestModel);
         break;
       case getCert:
-        pkiData = createGetCertRequest((CMCGetCertRequestModel) cmcRequestModel, messageTime);
+        pkiData = this.createGetCertRequest((CMCGetCertRequestModel) cmcRequestModel, messageTime);
         break;
       }
       requestBuilder
-        .pkiData(pkiData)
-        .cmcRequestBytes(CMCUtils.signEncapsulatedCMSContent(
-          CMCObjectIdentifiers.id_cct_PKIData,
-          pkiData, signerCertChain, signer));
+          .pkiData(pkiData)
+          .cmcRequestBytes(CMCUtils.signEncapsulatedCMSContent(
+              CMCObjectIdentifiers.id_cct_PKIData,
+              pkiData, this.signerCertChain, this.signer));
     }
-    catch (Exception ex) {
-      throw new IOException("Error generating CMC request", ex);
+    catch (final Exception e) {
+      throw new CMCMessageException("Error generating CMC request", e);
     }
     return requestBuilder.build();
   }
 
-  private PKIData createGetCertRequest(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
-    return new PKIData(getGetCertsControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {},
-      new TaggedContentInfo[] {}, new OtherMsg[] {});
+  private PKIData createGetCertRequest(final CMCGetCertRequestModel cmcRequestModel, final Date messageTime) {
+    return new PKIData(this.getGetCertsControlSequence(cmcRequestModel, messageTime), new TaggedRequest[] {},
+        new TaggedContentInfo[] {}, new OtherMsg[] {});
   }
 
-  private TaggedAttribute[] getGetCertsControlSequence(CMCGetCertRequestModel cmcRequestModel, Date messageTime) {
-    List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
+  private TaggedAttribute[] getGetCertsControlSequence(
+      final CMCGetCertRequestModel cmcRequestModel, final Date messageTime) {
+    final List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
-    addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
-    GeneralName gn = new GeneralName(cmcRequestModel.getIssuerName());
-    GetCert getCert = new GetCert(gn, cmcRequestModel.getSerialNumber());
+    this.addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
+    final GeneralName gn = new GeneralName(cmcRequestModel.getIssuerName());
+    final GetCert getCert = new GetCert(gn, cmcRequestModel.getSerialNumber());
     taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_getCert, getCert));
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private PKIData createAdminRequest(CMCAdminRequestModel cmcRequestModel) {
-    return new PKIData(getAdminControlSequence(cmcRequestModel), new TaggedRequest[] {}, new TaggedContentInfo[] {},
-      new OtherMsg[] {});
+  private PKIData createAdminRequest(final CMCAdminRequestModel cmcRequestModel) {
+    return new PKIData(this.getAdminControlSequence(cmcRequestModel), new TaggedRequest[] {},
+        new TaggedContentInfo[] {},
+        new OtherMsg[] {});
   }
 
-  private TaggedAttribute[] getAdminControlSequence(CMCAdminRequestModel cmcRequestModel) {
-    List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
+  private TaggedAttribute[] getAdminControlSequence(final CMCAdminRequestModel cmcRequestModel) {
+    final List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
-    addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
+    this.addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private PKIData createCertRequest(CMCCertificateRequestModel cmcRequestModel, Date messageTime)
-    throws NoSuchAlgorithmException, OperatorCreationException, IOException, CRMFException {
+  private PKIData createCertRequest(final CMCCertificateRequestModel cmcRequestModel, final Date messageTime)
+      throws NoSuchAlgorithmException, OperatorCreationException, CRMFException, CMCMessageException {
 
     TaggedRequest taggedCertificateRequest;
-    BodyPartID certReqBodyPartId = getBodyPartId();
-    TaggedAttribute[] controlSequence = getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(),
-      certReqBodyPartId);
-    PrivateKey certReqPrivate = cmcRequestModel.getCertReqPrivate();
+    final BodyPartID certReqBodyPartId = getBodyPartId();
+    final TaggedAttribute[] controlSequence =
+        this.getCertRequestControlSequence(cmcRequestModel, cmcRequestModel.getNonce(),
+            certReqBodyPartId);
+    final PrivateKey certReqPrivate = cmcRequestModel.getCertReqPrivate();
     if (certReqPrivate != null) {
-      ContentSigner p10Signer = new JcaContentSignerBuilder(
-        CAAlgorithmRegistry.getSigAlgoName(cmcRequestModel.getP10Algorithm()))
-        .build(certReqPrivate);
-      CertificationRequest certificationRequest = CMCUtils.getCertificationRequest(
-        cmcRequestModel.getCertificateModel(), p10Signer,
-        new AttributeValueEncoder());
+      final ContentSigner p10Signer = new JcaContentSignerBuilder(
+          CAAlgorithmRegistry.getSigAlgoName(cmcRequestModel.getP10Algorithm()))
+              .build(certReqPrivate);
+      final CertificationRequest certificationRequest = CMCUtils.getCertificationRequest(
+          cmcRequestModel.getCertificateModel(), p10Signer,
+          new AttributeValueEncoder());
       taggedCertificateRequest = new TaggedRequest(
-        new TaggedCertificationRequest(certReqBodyPartId, certificationRequest));
+          new TaggedCertificationRequest(certReqBodyPartId, certificationRequest));
     }
     else {
-      CertificateRequestMessageBuilder crmfBuilder = CMCUtils.getCRMFRequestMessageBuilder(certReqBodyPartId,
-        cmcRequestModel.getCertificateModel(), new AttributeValueEncoder());
-      extendCertTemplate(crmfBuilder, cmcRequestModel);
-      CertificateRequestMessage certificateRequestMessage = crmfBuilder.build();
+      final CertificateRequestMessageBuilder crmfBuilder = CMCUtils.getCRMFRequestMessageBuilder(certReqBodyPartId,
+          cmcRequestModel.getCertificateModel(), new AttributeValueEncoder());
+      this.extendCertTemplate(crmfBuilder, cmcRequestModel);
+      final CertificateRequestMessage certificateRequestMessage = crmfBuilder.build();
       taggedCertificateRequest = new TaggedRequest(certificateRequestMessage.toASN1Structure());
     }
 
     return new PKIData(controlSequence, new TaggedRequest[] { taggedCertificateRequest }, new TaggedContentInfo[] {},
-      new OtherMsg[] {});
+        new OtherMsg[] {});
   }
 
   /**
@@ -180,8 +204,8 @@ public class CMCRequestFactory {
    * @param crmfBuilder the CRMF builder holding default certificate template data
    * @param cmcRequestModel CMC request model holding data about the CMC request to be built
    */
-  protected void extendCertTemplate(CertificateRequestMessageBuilder crmfBuilder,
-    CMCCertificateRequestModel cmcRequestModel) {
+  protected void extendCertTemplate(final CertificateRequestMessageBuilder crmfBuilder,
+      final CMCCertificateRequestModel cmcRequestModel) {
     // Override this function to extend crmf cert template based on cmcRequestModel
   }
 
@@ -189,32 +213,31 @@ public class CMCRequestFactory {
     return getBodyPartId(new BigInteger(31, RNG).add(BigInteger.ONE));
   }
 
-  private static BodyPartID getBodyPartId(BigInteger bodyPartId) {
-    long id = Long.parseLong(bodyPartId.toString(10));
+  private static BodyPartID getBodyPartId(final BigInteger bodyPartId) {
+    final long id = Long.parseLong(bodyPartId.toString(10));
     return new BodyPartID(id);
   }
 
-  private TaggedAttribute[] getCertRevocationControlSequence(CMCRevokeRequestModel cmcRequestModel) {
-    List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
+  private TaggedAttribute[] getCertRevocationControlSequence(final CMCRevokeRequestModel cmcRequestModel) {
+    final List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceControl(taggedAttributeList, cmcRequestModel.getNonce());
-    addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
-    RevokeRequest revokeRequest = new RevokeRequest(
-      cmcRequestModel.getIssuerName(),
-      new ASN1Integer(cmcRequestModel.getSerialNumber()),
-      CRLReason.lookup(cmcRequestModel.getReason()),
-      new ASN1GeneralizedTime(cmcRequestModel.getRevocationDate()), null, null
-    );
+    this.addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
+    final RevokeRequest revokeRequest = new RevokeRequest(
+        cmcRequestModel.getIssuerName(),
+        new ASN1Integer(cmcRequestModel.getSerialNumber()),
+        CRLReason.lookup(cmcRequestModel.getReason()),
+        new ASN1GeneralizedTime(cmcRequestModel.getRevocationDate()), null, null);
     taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_revokeRequest, revokeRequest));
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private TaggedAttribute[] getCertRequestControlSequence(CMCCertificateRequestModel cmcRequestModel, byte[] nonce,
-    BodyPartID certReqBodyPartId) {
-    List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
+  private TaggedAttribute[] getCertRequestControlSequence(final CMCCertificateRequestModel cmcRequestModel,
+      final byte[] nonce, final BodyPartID certReqBodyPartId) {
+    final List<TaggedAttribute> taggedAttributeList = new ArrayList<>();
     addNonceControl(taggedAttributeList, nonce);
-    addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
+    this.addRegistrationInfoControl(taggedAttributeList, cmcRequestModel);
     if (cmcRequestModel.isLraPopWitness()) {
-      ASN1EncodableVector lraPopWitSeq = new ASN1EncodableVector();
+      final ASN1EncodableVector lraPopWitSeq = new ASN1EncodableVector();
       lraPopWitSeq.add(getBodyPartId());
       lraPopWitSeq.add(new DERSequence(certReqBodyPartId));
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_lraPOPWitness, new DERSequence(lraPopWitSeq)));
@@ -222,8 +245,9 @@ public class CMCRequestFactory {
     return taggedAttributeList.toArray(new TaggedAttribute[0]);
   }
 
-  private void addRegistrationInfoControl(List<TaggedAttribute> taggedAttributeList, CMCRequestModel cmcRequestModel) {
-    byte[] registrationInfo = cmcRequestModel.getRegistrationInfo();
+  private void addRegistrationInfoControl(
+      final List<TaggedAttribute> taggedAttributeList, final CMCRequestModel cmcRequestModel) {
+    final byte[] registrationInfo = cmcRequestModel.getRegistrationInfo();
     if (registrationInfo != null) {
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_regInfo, new DEROctetString(registrationInfo)));
     }
@@ -236,38 +260,39 @@ public class CMCRequestFactory {
    * @param taggedAttributeList list of tagged attributes to which the nonce should be added
    * @param nonce nonce data to be added
    */
-  public static void addNonceControl(List<TaggedAttribute> taggedAttributeList, byte[] nonce) {
+  public static void addNonceControl(final List<TaggedAttribute> taggedAttributeList, final byte[] nonce) {
     if (nonce != null) {
       taggedAttributeList.add(getControl(CMCObjectIdentifiers.id_cmc_senderNonce, new DEROctetString(nonce)));
     }
   }
 
   /**
-   * Get a CMC Control in the form of a {@link TaggedAttribute} based on the components OID, and
-   * a set of attribute values. BodyPartID will be randomly generated.
+   * Get a CMC Control in the form of a {@link TaggedAttribute} based on the components OID, and a set of attribute
+   * values. BodyPartID will be randomly generated.
    *
    * @param oid Control OID
    * @param values attribute values
    * @return {@link TaggedAttribute} containing CMC Control data
    */
-  public static TaggedAttribute getControl(ASN1ObjectIdentifier oid, ASN1Encodable... values) {
+  public static TaggedAttribute getControl(final ASN1ObjectIdentifier oid, final ASN1Encodable... values) {
     return getControl(oid, null, values);
   }
 
   /**
-   * Get a CMC Control in the form of a {@link TaggedAttribute} based on the components OID, BodyPartID and
-   * a set of attribute values
+   * Get a CMC Control in the form of a {@link TaggedAttribute} based on the components OID, BodyPartID and a set of
+   * attribute values
    *
    * @param oid Control OID
    * @param id BodyPartID or null to get a randomly generated BodyPartID
    * @param values attribute values
    * @return {@link TaggedAttribute} containing CMC Control data
    */
-  public static TaggedAttribute getControl(ASN1ObjectIdentifier oid, BodyPartID id, ASN1Encodable... values) {
+  public static TaggedAttribute getControl(
+      final ASN1ObjectIdentifier oid, BodyPartID id, final ASN1Encodable... values) {
     if (id == null) {
       id = getBodyPartId();
     }
-    ASN1Set valueSet = getSet(values);
+    final ASN1Set valueSet = getSet(values);
     return new TaggedAttribute(id, oid, valueSet);
   }
 
@@ -277,48 +302,49 @@ public class CMCRequestFactory {
    * @param content attribute values
    * @return ASN.1 set of attribute values
    */
-  public static ASN1Set getSet(ASN1Encodable... content) {
-    ASN1EncodableVector valueSet = new ASN1EncodableVector();
-    for (ASN1Encodable data : content) {
+  public static ASN1Set getSet(final ASN1Encodable... content) {
+    final ASN1EncodableVector valueSet = new ASN1EncodableVector();
+    for (final ASN1Encodable data : content) {
       valueSet.add(data);
     }
     return new DERSet(valueSet);
   }
 
   /**
-   * Adds a certificate request from PKIData to a CMC request builder. This allows the request builder
-   * to build a CMC request that includes a certificate issuance request.
+   * Adds a certificate request from PKIData to a CMC request builder. This allows the request builder to build a CMC
+   * request that includes a certificate issuance request.
    *
    * @param pkiData PKIData holding the certificate request in the form of a PKCS#10 request or a CRMF request
    * @param cmcRequestBuilder CMC request builder to which the certificate request should be added
    */
-  private void addCertRequestData(PKIData pkiData, CMCRequest.CMCRequestBuilder cmcRequestBuilder) {
+  private void addCertRequestData(final PKIData pkiData, final CMCRequest.CMCRequestBuilder cmcRequestBuilder) {
     if (pkiData == null || pkiData.getReqSequence() == null) {
       return;
     }
-    TaggedRequest[] reqSequence = pkiData.getReqSequence();
-    for (TaggedRequest taggedRequest : reqSequence) {
-      ASN1Encodable taggedRequestValue = taggedRequest.getValue();
+    final TaggedRequest[] reqSequence = pkiData.getReqSequence();
+    for (final TaggedRequest taggedRequest : reqSequence) {
+      final ASN1Encodable taggedRequestValue = taggedRequest.getValue();
       if (taggedRequestValue instanceof TaggedCertificationRequest) {
         // This is a PKCS#10 request
-        TaggedCertificationRequest taggedCertReq = (TaggedCertificationRequest) taggedRequestValue;
-        ASN1Sequence taggedCertReqSeq = ASN1Sequence.getInstance(taggedCertReq.toASN1Primitive());
-        BodyPartID certReqBodyPartId = BodyPartID.getInstance(taggedCertReqSeq.getObjectAt(0));
-        CertificationRequest certificationRequest = CertificationRequest.getInstance(taggedCertReqSeq.getObjectAt(1));
+        final TaggedCertificationRequest taggedCertReq = (TaggedCertificationRequest) taggedRequestValue;
+        final ASN1Sequence taggedCertReqSeq = ASN1Sequence.getInstance(taggedCertReq.toASN1Primitive());
+        final BodyPartID certReqBodyPartId = BodyPartID.getInstance(taggedCertReqSeq.getObjectAt(0));
+        final CertificationRequest certificationRequest =
+            CertificationRequest.getInstance(taggedCertReqSeq.getObjectAt(1));
         cmcRequestBuilder
-          .certificationRequest(certificationRequest)
-          .certReqBodyPartId(certReqBodyPartId);
+            .certificationRequest(certificationRequest)
+            .certReqBodyPartId(certReqBodyPartId);
         return;
       }
       if (taggedRequestValue instanceof CertReqMsg) {
         // This is a CRMF request
-        CertificateRequestMessage certificateRequestMessage = new CertificateRequestMessage(
-          (CertReqMsg) taggedRequestValue);
-        ASN1Integer certReqId = ((CertReqMsg) taggedRequestValue).getCertReq().getCertReqId();
-        BodyPartID certReqBodyPartId = new BodyPartID(certReqId.longValueExact());
+        final CertificateRequestMessage certificateRequestMessage = new CertificateRequestMessage(
+            (CertReqMsg) taggedRequestValue);
+        final ASN1Integer certReqId = ((CertReqMsg) taggedRequestValue).getCertReq().getCertReqId();
+        final BodyPartID certReqBodyPartId = new BodyPartID(certReqId.longValueExact());
         cmcRequestBuilder
-          .certificateRequestMessage(certificateRequestMessage)
-          .certReqBodyPartId(certReqBodyPartId);
+            .certificateRequestMessage(certificateRequestMessage)
+            .certReqBodyPartId(certReqBodyPartId);
         return;
       }
     }

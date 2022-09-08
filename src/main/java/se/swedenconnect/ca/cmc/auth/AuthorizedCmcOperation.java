@@ -25,9 +25,11 @@ public enum AuthorizedCmcOperation {
 
   /** Issue certificate operations */
   issue,
+
   /** Revoke certificates operations */
   revoke,
+
   /** Read data operations making no changes to the CA repository */
-  read
+  read;
 
 }

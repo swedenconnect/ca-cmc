@@ -16,8 +16,19 @@
 
 package se.swedenconnect.ca.cmc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.xml.security.signature.XMLSignature;
 import org.bouncycastle.asn1.cmc.BodyPartID;
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
@@ -27,9 +38,15 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
-import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
-import se.swedenconnect.ca.cmc.api.*;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.cmc.api.CMCCaApi;
+import se.swedenconnect.ca.cmc.api.CMCRequestFactory;
+import se.swedenconnect.ca.cmc.api.CMCRequestParser;
+import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
+import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
@@ -38,7 +55,13 @@ import se.swedenconnect.ca.cmc.api.impl.DefaultCMCCaApi;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCReplayChecker;
 import se.swedenconnect.ca.cmc.auth.impl.DefaultCMCValidator;
-import se.swedenconnect.ca.cmc.ca.*;
+import se.swedenconnect.ca.cmc.ca.CertRequestData;
+import se.swedenconnect.ca.cmc.ca.CertValidatorComponents;
+import se.swedenconnect.ca.cmc.ca.TestCA;
+import se.swedenconnect.ca.cmc.ca.TestCAHolder;
+import se.swedenconnect.ca.cmc.ca.TestCAService;
+import se.swedenconnect.ca.cmc.ca.TestServices;
+import se.swedenconnect.ca.cmc.ca.ValidatorProfile;
 import se.swedenconnect.ca.cmc.data.CMCRequestData;
 import se.swedenconnect.ca.cmc.data.TestResponseStatus;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
@@ -46,6 +69,7 @@ import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
 import se.swedenconnect.ca.cmc.model.admin.request.ListCerts;
 import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
 import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.cmc.model.request.impl.CMCAdminRequestModel;
@@ -64,19 +88,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.impl.DefaultCertificateModelBui
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 import se.swedenconnect.ca.engine.utils.CAUtils;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
 
 /**
  * Test implementations
@@ -232,12 +244,13 @@ public class CMCTests {
     log.info("Parsed Admin request - List All Serials:\n{}", CMCDataPrint.printCMCRequest(cmcParsed, false, false));
     CMCDataValidator.validateCMCRequest(cmcParsed, requestModel);
 
-    //Replay request
+    // Replay request
     log.info("Replay test - Parsing old request");
     try {
       cmcParsed = cmcRequestParser.parseCMCrequest(cmcRequest.getCmcRequestBytes());
       throw new RuntimeException("This is a replay, but this was not detected");
-    } catch (IOException ex){
+    }
+    catch (CMCException ex){
       log.info("Replay detection succeeded: {}", ex.toString());
       // This time should allow the replay cache to be cleared as defined
       Thread.sleep(1000);

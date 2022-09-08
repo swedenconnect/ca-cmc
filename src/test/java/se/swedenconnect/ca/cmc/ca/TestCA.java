@@ -16,11 +16,12 @@
 
 package se.swedenconnect.ca.cmc.ca;
 
+import java.security.KeyPair;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 
-import java.security.KeyPair;
 /**
  * Enumeration of configuration data for test CA providers
  *
@@ -31,33 +32,32 @@ import java.security.KeyPair;
 @Getter
 public enum TestCA {
   INSTANCE1(
-    "rsa-ca",
-    "XA",
-    "XA RSA Test CA",
-    TestServices.rsa2048kp01,
-    CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256,
-    "XA RSA OCSP responder",
-    TestServices.rsa2048kp02,
-    CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256),
+      "rsa-ca",
+      "XA",
+      "XA RSA Test CA",
+      TestServices.rsa2048kp01,
+      CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256,
+      "XA RSA OCSP responder",
+      TestServices.rsa2048kp02,
+      CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256),
 
   RA_CA(
-    "rsa-pss-ca",
-    "XB",
-    "XB RSA PSS Test CA",
-    TestServices.rsa2048kp01,
-    CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1,
-    "XB RSA PSS OCSP responder",
-    TestServices.rsa2048kp02,
-    CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256),
-  ECDSA_CA(
-    "ecdsa-ca",
-    "XC",
-    "XC ECDSA Test CA",
-    TestServices.ec256kp01,
-    CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256,
-    "XC ECDSA OCSP responder",
-    TestServices.ec256kp02,
-    CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256);
+      "rsa-pss-ca",
+      "XB",
+      "XB RSA PSS Test CA",
+      TestServices.rsa2048kp01,
+      CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256_MGF1,
+      "XB RSA PSS OCSP responder",
+      TestServices.rsa2048kp02,
+      CAAlgorithmRegistry.ALGO_ID_SIGNATURE_RSA_SHA256), ECDSA_CA(
+          "ecdsa-ca",
+          "XC",
+          "XC ECDSA Test CA",
+          TestServices.ec256kp01,
+          CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256,
+          "XC ECDSA OCSP responder",
+          TestServices.ec256kp02,
+          CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256);
 
   String id;
   String country;

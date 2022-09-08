@@ -16,7 +16,7 @@
 package se.swedenconnect.ca.cmc.model.request;
 
 /**
- * Interface for the CMC Request model
+ * Interface for the CMC Request model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -24,19 +24,22 @@ package se.swedenconnect.ca.cmc.model.request;
 public interface CMCRequestModel {
 
   /**
-   * Gets the request nonce
+   * Gets the request nonce.
+   *
    * @return request nonce
    */
   byte[] getNonce();
 
   /**
-   * Gets the registration info data. Each request type identifies the syntax of this parameter
+   * Gets the registration info data. Each request type identifies the syntax of this parameter.
+   *
    * @return registration info data
    */
   byte[] getRegistrationInfo();
 
   /**
-   * The type of request
+   * The type of request.
+   *
    * @return cmc request type
    */
   CMCRequestType getCmcRequestType();

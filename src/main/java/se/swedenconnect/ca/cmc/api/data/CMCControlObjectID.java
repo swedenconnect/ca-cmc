@@ -15,14 +15,14 @@
  */
 package se.swedenconnect.ca.cmc.api.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Arrays;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
 
-import java.util.Arrays;
-import java.util.Optional;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Enumeration of CMC Control object identifiers
@@ -37,77 +37,107 @@ public enum CMCControlObjectID {
 
   /** CMC status info */
   statusInfo(CMCObjectIdentifiers.id_cmc_statusInfo),
+
   /** CMC identification */
   identification(CMCObjectIdentifiers.id_cmc_identification),
+
   /** CMC identity proof */
   identityProof(CMCObjectIdentifiers.id_cmc_identityProof),
+
   /** CMC data return */
   dataReturn(CMCObjectIdentifiers.id_cmc_dataReturn),
+
   /** CMC transaction ID */
   transactionId(CMCObjectIdentifiers.id_cmc_transactionId),
+
   /** CMC sender nonce */
   senderNonce(CMCObjectIdentifiers.id_cmc_senderNonce),
+
   /** CMC recipient nonce */
   recipientNonce(CMCObjectIdentifiers.id_cmc_recipientNonce),
+
   /** CMC add extensions */
   addExtensions(CMCObjectIdentifiers.id_cmc_addExtensions),
+
   /** CMC encrypted POP */
   encryptedPOP(CMCObjectIdentifiers.id_cmc_encryptedPOP),
+
   /** CMC decrypted POP */
   decryptedPOP(CMCObjectIdentifiers.id_cmc_decryptedPOP),
+
   /** CMC LRA POP witness */
   lraPOPWitness(CMCObjectIdentifiers.id_cmc_lraPOPWitness),
+
   /** Get certificate */
   getCert(CMCObjectIdentifiers.id_cmc_getCert),
+
   /** Get CRL */
   getCRL(CMCObjectIdentifiers.id_cmc_getCRL),
+
   /** CMC revoke request */
   revokeRequest(CMCObjectIdentifiers.id_cmc_revokeRequest),
+
   /** CMC registration info used as extension point for custom requests */
   regInfo(CMCObjectIdentifiers.id_cmc_regInfo),
+
   /** CMC response info used as extension point for custom response data */
   responseInfo(CMCObjectIdentifiers.id_cmc_responseInfo),
+
   /** CMC Query pending */
   queryPending(CMCObjectIdentifiers.id_cmc_queryPending),
+
   /** CMC POP link random */
   popLinkRandom(CMCObjectIdentifiers.id_cmc_popLinkRandom),
+
   /** CMC POP link witness */
   popLinkWitness(CMCObjectIdentifiers.id_cmc_popLinkWitness),
+
   /** CMC POP link witness V2 */
   popLinkWitnessV2(CMCObjectIdentifiers.id_cmc_popLinkWitnessV2),
+
   /** CMC confirm certificate acceptance */
   confirmCertAcceptance(CMCObjectIdentifiers.id_cmc_confirmCertAcceptance),
+
   /** CMC status info V2 */
   statusInfoV2(CMCObjectIdentifiers.id_cmc_statusInfoV2),
+
   /** CMC trusted anchors */
   trustedAnchors(CMCObjectIdentifiers.id_cmc_trustedAnchors),
+
   /** CMC auth data */
   authData(CMCObjectIdentifiers.id_cmc_authData),
+
   /** CMC batch requests */
   batchRequests(CMCObjectIdentifiers.id_cmc_batchRequests),
+
   /** CMC batch responses */
   batchResponses(CMCObjectIdentifiers.id_cmc_batchResponses),
+
   /** CMC publish certificate */
   publishCert(CMCObjectIdentifiers.id_cmc_publishCert),
+
   /** CMC public certificate */
   modCertTemplate(CMCObjectIdentifiers.id_cmc_modCertTemplate),
+
   /** CMC control processed */
   controlProcessed(CMCObjectIdentifiers.id_cmc_controlProcessed),
+
   /** CMC identity proof V2 */
   identityProofV2(CMCObjectIdentifiers.id_cmc_identityProofV2);
-
 
   private ASN1ObjectIdentifier oid;
 
   /**
    * Return the Enum instance of the CMC Control object identifier matching a specified ASN OID
+   *
    * @param oid ASN.1 OID
    * @return Enum instance if match found, or else null
    */
-  public static CMCControlObjectID getControlObjectID(String oid){
+  public static CMCControlObjectID getControlObjectID(final String oid) {
     try {
       return getControlObjectID(new ASN1ObjectIdentifier(oid));
-    } catch (Exception ex){
+    }
+    catch (Exception ex) {
       log.debug("Illegal Object Identifier: {}", ex.toString());
       return null;
     }
@@ -115,14 +145,15 @@ public enum CMCControlObjectID {
 
   /**
    * Return the Enum instance of the CMC Control object identifier matching a specified ASN OID
+   *
    * @param oid ASN.1 OID
    * @return Enum instance if match found, or else null
    */
-  public static CMCControlObjectID getControlObjectID(ASN1ObjectIdentifier oid){
+  public static CMCControlObjectID getControlObjectID(final ASN1ObjectIdentifier oid) {
     return Arrays.stream(values())
-      .filter(cmcControlObjectID -> cmcControlObjectID.getOid().equals(oid))
-      .findFirst()
-      .orElse(null);
+        .filter(cmcControlObjectID -> cmcControlObjectID.getOid().equals(oid))
+        .findFirst()
+        .orElse(null);
   }
 
 }

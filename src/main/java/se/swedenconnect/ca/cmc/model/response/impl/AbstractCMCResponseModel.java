@@ -15,19 +15,18 @@
  */
 package se.swedenconnect.ca.cmc.model.response.impl;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.bouncycastle.asn1.cmc.BodyPartID;
-import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
-import se.swedenconnect.ca.cmc.model.response.CMCResponseModel;
-
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
+import se.swedenconnect.ca.cmc.model.response.CMCResponseModel;
+
 /**
- * Abstract implementation of the CMC response model
+ * Abstract implementation of the CMC response model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -35,40 +34,14 @@ import java.util.List;
 public class AbstractCMCResponseModel implements CMCResponseModel {
 
   /**
-   * Constructor for response model with no custom data
-   *
-   * @param nonce response nonce
-   * @param cmcResponseStatus response status
-   * @param cmcRequestType request type
-   */
-  public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType) {
-    this(nonce, cmcResponseStatus, cmcRequestType,  null);
-  }
-
-  /**
-   * Constructor for response model with custom data
-   *
-   * @param nonce response nonce
-   * @param cmcResponseStatus response status
-   * @param cmcRequestType request type
-   * @param responseInfo custom response data
-   */
-  public AbstractCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, byte[] responseInfo) {
-    this.nonce = nonce;
-    this.responseInfo = responseInfo;
-    this.cmcResponseStatus = cmcResponseStatus;
-    this.returnCertificates = new ArrayList<>();
-    this.cmcRequestType = cmcRequestType;
-  }
-
-
-  /**
    * Nonce
    *
    * @param nonce nonce
    * @return nonce value
    */
-  @Getter @Setter protected byte[] nonce;
+  @Getter
+  @Setter
+  protected byte[] nonce;
 
   /**
    * Response info bytes used to communicate custom result data in the response
@@ -76,7 +49,9 @@ public class AbstractCMCResponseModel implements CMCResponseModel {
    * @param responseInfo response info
    * @return response info bytes
    */
-  @Getter @Setter protected byte[] responseInfo;
+  @Getter
+  @Setter
+  protected byte[] responseInfo;
 
   /**
    * Certificates returned by the CMC response
@@ -84,19 +59,53 @@ public class AbstractCMCResponseModel implements CMCResponseModel {
    * @param returnCertificates return certificates
    * @return certificates returned in CMC response
    */
-  @Getter @Setter protected List<X509Certificate> returnCertificates;
+  @Getter
+  @Setter
+  protected List<X509Certificate> returnCertificates;
 
   /**
    * Status of the CMC response
    *
    * @return cmc response status
    */
-  @Getter protected CMCResponseStatus cmcResponseStatus;
+  @Getter
+  protected CMCResponseStatus cmcResponseStatus;
 
   /**
    * CMC Request type
    *
    * @return cmc request type
    */
-  @Getter protected CMCRequestType cmcRequestType;
+  @Getter
+  protected CMCRequestType cmcRequestType;
+
+  /**
+   * Constructor for response model with no custom data.
+   *
+   * @param nonce response nonce
+   * @param cmcResponseStatus response status
+   * @param cmcRequestType request type
+   */
+  public AbstractCMCResponseModel(
+      final byte[] nonce, final CMCResponseStatus cmcResponseStatus, final CMCRequestType cmcRequestType) {
+    this(nonce, cmcResponseStatus, cmcRequestType, null);
+  }
+
+  /**
+   * Constructor for response model with custom data.
+   *
+   * @param nonce response nonce
+   * @param cmcResponseStatus response status
+   * @param cmcRequestType request type
+   * @param responseInfo custom response data
+   */
+  public AbstractCMCResponseModel(final byte[] nonce, final CMCResponseStatus cmcResponseStatus,
+      final CMCRequestType cmcRequestType, final byte[] responseInfo) {
+    this.nonce = nonce;
+    this.responseInfo = responseInfo;
+    this.cmcResponseStatus = cmcResponseStatus;
+    this.returnCertificates = new ArrayList<>();
+    this.cmcRequestType = cmcRequestType;
+  }
+
 }

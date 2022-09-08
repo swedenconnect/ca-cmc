@@ -21,7 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Dataclass for a certificate record in the CA database
+ * Dataclass for a certificate record in the CA database.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -32,12 +32,15 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CertificateData {
 
-  /** The bytes of the certificate in the record */
+  /** The bytes of the certificate in the record. */
   private byte[] certificate;
-  /** Indicates of the certificate is currently revoked */
+
+  /** Indicates of the certificate is currently revoked. */
   private boolean revoked;
-  /** Revocation reason if the certificate is revoked */
+
+  /** Revocation reason if the certificate is revoked. */
   private int revocationReason;
-  /** Revocation date if the certificate is revoked */
+
+  /** Revocation date if the certificate is revoked. */
   private long revocationDate;
 }

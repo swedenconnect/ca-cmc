@@ -15,11 +15,12 @@
  */
 package se.swedenconnect.ca.cmc.api.data;
 
+import org.bouncycastle.asn1.cmc.BodyPartID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bouncycastle.asn1.cmc.BodyPartID;
 
 /**
  * Data class for a CMC control object
@@ -37,8 +38,10 @@ public class CMCControlObject {
 
   /** Unique identifier of the control attribute */
   BodyPartID bodyPartID;
+
   /** Object Identifier of the control attribute */
   CMCControlObjectID type;
+
   /** Attribute value */
   Object value;
 

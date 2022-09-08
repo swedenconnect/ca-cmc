@@ -15,31 +15,36 @@
  */
 package se.swedenconnect.ca.cmc.ca;
 
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.utils.TestUtils;
 
-import java.security.KeyPair;
-import java.security.cert.X509Certificate;
-import java.util.*;
-
 /**
  * This is the top level class for accessing test data and services for unit testing
  *
- * The structure for CA services is the following
- *  - TestCAHolder is a super class for a CA service and related data
- *  - TestCAService holds a CA service. The CA Service in turn consist of a Certificate issuer component that creates the certificates
- *    and the CA repository and revocation services.
- *  - The TestCARepository is a simple implementation of a repository used to store information about issued Certificates
+ * The structure for CA services is the following - TestCAHolder is a super class for a CA service and related data -
+ * TestCAService holds a CA service. The CA Service in turn consist of a Certificate issuer component that creates the
+ * certificates and the CA repository and revocation services. - The TestCARepository is a simple implementation of a
+ * repository used to store information about issued Certificates
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
 public class TestServices {
-  @Getter private static Map<TestCA, TestCAHolder> testCAs;
-  @Getter private static Map<ValidatorProfile, CertValidatorComponents> certValidators;
+  @Getter
+  private static Map<TestCA, TestCAHolder> testCAs;
+  @Getter
+  private static Map<ValidatorProfile, CertValidatorComponents> certValidators;
   private static List<X509Certificate> trustAnchors;
   public static KeyPair rsa2048kp01;
   public static KeyPair rsa2048kp02;
@@ -83,12 +88,13 @@ public class TestServices {
 
   public static void addValidators(boolean singleThreaded) {
     certValidators = new HashMap<>();
-    Arrays.stream(ValidatorProfile.values()).forEach(profile -> certValidators.put(profile, getValidator(profile, singleThreaded)));
+    Arrays.stream(ValidatorProfile.values())
+        .forEach(profile -> certValidators.put(profile, getValidator(profile, singleThreaded)));
   }
 
   @SneakyThrows
   public static CertValidatorComponents getValidator(ValidatorProfile profile, boolean singleThreaded) {
-    return TestValidatorFactory.getCertificateValidator(trustAnchors, profile, singleThreaded );
+    return TestValidatorFactory.getCertificateValidator(trustAnchors, profile, singleThreaded);
   }
 
 }

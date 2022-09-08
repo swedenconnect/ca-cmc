@@ -16,18 +16,22 @@
 package se.swedenconnect.ca.cmc.model.admin;
 
 /**
- * Enumeration of supported admin request types
+ * Enumeration of supported admin request types.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public enum AdminRequestType {
-  /** Request for information about the responding CA */
+
+  /** Request for information about the responding CA. */
   caInfo,
-  /** Request for static information about the responding CA */
+
+  /** Request for static information about the responding CA. */
   staticCaInfo,
-  /** Request to obtain a list of issued certificates from the CA */
+
+  /** Request to obtain a list of issued certificates from the CA. */
   listCerts,
-  /** Request to obtain a list of all current certificate serial numbers of certificates in the CA database */
+
+  /** Request to obtain a list of all current certificate serial numbers of certificates in the CA database. */
   allCertSerials
 }

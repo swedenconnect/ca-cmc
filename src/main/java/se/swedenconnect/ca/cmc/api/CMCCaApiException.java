@@ -15,29 +15,34 @@
  */
 package se.swedenconnect.ca.cmc.api;
 
-import lombok.Getter;
-import org.bouncycastle.asn1.cmc.BodyPartID;
-import se.swedenconnect.ca.cmc.api.data.CMCFailType;
-
-import java.io.IOException;
 import java.util.List;
+
+import org.bouncycastle.asn1.cmc.BodyPartID;
+
+import lombok.Getter;
+import se.swedenconnect.ca.cmc.CMCException;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 
 /**
  * Exception used within the CMC CA API.
  *
- * This Exception provides information about the CMC failure code as well as a list of body part IDs of CMC objects that caused the failure
+ * This exception provides information about the CMC failure code as well as a list of body part IDs of CMC objects that
+ * caused the failure.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCCaApiException extends IOException {
+public class CMCCaApiException extends CMCException {
 
   private static final long serialVersionUID = -887662559964395201L;
 
   /** List of BodyPartID of CMC objects that was processed when the failure occurred */
-  @Getter private final List<BodyPartID> failingBodyPartIds;
+  @Getter
+  private final List<BodyPartID> failingBodyPartIds;
+
   /** CMC failure type */
-  @Getter private final CMCFailType cmcFailType;
+  @Getter
+  private final CMCFailType cmcFailType;
 
   /**
    * Constructor
@@ -46,7 +51,8 @@ public class CMCCaApiException extends IOException {
    * @param failingBodyPartIds failing body part IDs
    * @param cmcFailType cmc fail type
    */
-  public CMCCaApiException(String message, List<BodyPartID> failingBodyPartIds, CMCFailType cmcFailType) {
+  public CMCCaApiException(
+      final String message, final List<BodyPartID> failingBodyPartIds, final CMCFailType cmcFailType) {
     super(message);
     this.failingBodyPartIds = failingBodyPartIds;
     this.cmcFailType = cmcFailType;
@@ -60,8 +66,8 @@ public class CMCCaApiException extends IOException {
    * @param failingBodyPartIds failing body part IDs
    * @param cmcFailType cmc fail type
    */
-  public CMCCaApiException(String message, Throwable cause, List<BodyPartID> failingBodyPartIds,
-    CMCFailType cmcFailType) {
+  public CMCCaApiException(final String message, final Throwable cause,
+      final List<BodyPartID> failingBodyPartIds, final CMCFailType cmcFailType) {
     super(message, cause);
     this.failingBodyPartIds = failingBodyPartIds;
     this.cmcFailType = cmcFailType;
@@ -74,7 +80,8 @@ public class CMCCaApiException extends IOException {
    * @param failingBodyPartIds failing body part IDs
    * @param cmcFailType cmc fail type
    */
-  public CMCCaApiException(Throwable cause, List<BodyPartID> failingBodyPartIds, CMCFailType cmcFailType) {
+  public CMCCaApiException(
+      final Throwable cause, final List<BodyPartID> failingBodyPartIds, final CMCFailType cmcFailType) {
     super(cause);
     this.failingBodyPartIds = failingBodyPartIds;
     this.cmcFailType = cmcFailType;

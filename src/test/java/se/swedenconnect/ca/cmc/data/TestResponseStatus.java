@@ -15,14 +15,14 @@
  */
 package se.swedenconnect.ca.cmc.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import java.util.List;
+
 import org.bouncycastle.asn1.cmc.BodyPartID;
+
+import lombok.AllArgsConstructor;
 import se.swedenconnect.ca.cmc.api.data.CMCFailType;
 import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
 import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
-
-import java.util.List;
 
 /**
  * Test response status
@@ -34,23 +34,23 @@ import java.util.List;
 public enum TestResponseStatus {
 
   success(CMCResponseStatus.builder()
-    .status(CMCStatusType.success)
-    .build()),
-  failBadRequest(CMCResponseStatus.builder()
-    .status(CMCStatusType.failed)
-    .failType(CMCFailType.badRequest)
-    .message("Bad CMC Request")
-    .build());
+      .status(CMCStatusType.success)
+      .build()), failBadRequest(
+          CMCResponseStatus.builder()
+              .status(CMCStatusType.failed)
+              .failType(CMCFailType.badRequest)
+              .message("Bad CMC Request")
+              .build());
 
   private CMCResponseStatus responseStatus;
 
-  public CMCResponseStatus withBodyParts(List<BodyPartID> bodyPartIDList){
+  public CMCResponseStatus withBodyParts(List<BodyPartID> bodyPartIDList) {
     CMCResponseStatus status = CMCResponseStatus.builder()
-      .status(responseStatus.getStatus())
-      .failType(responseStatus.getFailType())
-      .message(responseStatus.getMessage())
-      .bodyPartIDList(bodyPartIDList)
-      .build();
+        .status(responseStatus.getStatus())
+        .failType(responseStatus.getFailType())
+        .message(responseStatus.getMessage())
+        .bodyPartIDList(bodyPartIDList)
+        .build();
     return status;
   }
 

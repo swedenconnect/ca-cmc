@@ -16,15 +16,15 @@
 package se.swedenconnect.ca.cmc.model.request.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import lombok.Getter;
-import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
-import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 
-import java.io.IOException;
+import lombok.Getter;
+import se.swedenconnect.ca.cmc.api.CMCMessageException;
+import se.swedenconnect.ca.cmc.auth.CMCUtils;
+import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 /**
- * CMC Revocation request model
+ * CMC Revocation request model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -33,13 +33,12 @@ import java.io.IOException;
 public class CMCAdminRequestModel extends AbstractCMCRequestModel {
 
   /**
-   * Constructor for CMC admin request model
+   * Constructor for CMC admin request model.
    *
-   * @param adminRequestData  admin request data
-   * @throws IOException on errors parsing admin request data
+   * @param adminRequestData admin request data
+   * @throws CMCMessageException on errors parsing admin request data
    */
-  public CMCAdminRequestModel(AdminCMCData adminRequestData)
-    throws IOException {
+  public CMCAdminRequestModel(final AdminCMCData adminRequestData) throws CMCMessageException {
     super(CMCRequestType.admin, getReqInfo(adminRequestData));
   }
 
@@ -48,14 +47,14 @@ public class CMCAdminRequestModel extends AbstractCMCRequestModel {
    *
    * @param adminCMCData admin request data
    * @return bytes of the admin request data
-   * @throws IOException on errors parsing admin request data
+   * @throws CMCMessageException on errors parsing admin request data
    */
-  private static byte[] getReqInfo(AdminCMCData adminCMCData) throws IOException {
+  private static byte[] getReqInfo(final AdminCMCData adminCMCData) throws CMCMessageException {
     try {
       return CMCUtils.OBJECT_MAPPER.writeValueAsBytes(adminCMCData);
     }
-    catch (JsonProcessingException e) {
-      throw new IOException("Unable to convert admin request data to JSON", e);
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Unable to convert admin request data to JSON", e);
     }
   }
 }
