@@ -15,7 +15,6 @@
  */
 package se.swedenconnect.ca.cmc.api.client.impl;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -124,8 +123,6 @@ public abstract class AbstractCMCClient implements CMCClient {
    *
    * @param cmcRequestUrl URL where CMC requests are sent to the remote CA
    * @param cmcClientCredential the private key and certificate for the CMC client
-   * @param cmcSigningKey CMC client signing key
-   * @param cmcSigningCert CMC client signing certificate
    * @param algorithm CMC signing algorithm
    * @param cmcResponseCert signing certificate of the remote CA CMC responder
    * @param caCertificate CA certificate used by the remote CA to issue certificates
@@ -229,7 +226,7 @@ public abstract class AbstractCMCClient implements CMCClient {
    * @param notRevoked tue to exclude all revoked certificates from the pages of certificates
    * @param descending true to use descending sorting order
    * @return the identified page of certificates
-   * @throws IOException on error processing the request
+   * @throws CMCException on error processing the request
    */
   @Override
   public CMCResponse listCertificates(final int pageSize, final int pageIndex, final SortBy sortBy,
@@ -261,7 +258,7 @@ public abstract class AbstractCMCClient implements CMCClient {
    * @param includeCrlDPs true to include CRL distribution point URLs in the issued certificate
    * @param includeOcspURL true to include OCSP URL (if present) in the issued certificate
    * @return certificate model builder
-   * @throws IOException errors obtaining the certificate model builder
+   * @throws CMCException errors obtaining the certificate model builder
    */
   @Override
   public CMCCertificateModelBuilder getCertificateModelBuilder(final PublicKey subjectPublicKey,

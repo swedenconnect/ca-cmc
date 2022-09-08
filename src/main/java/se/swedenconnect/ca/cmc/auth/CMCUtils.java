@@ -185,7 +185,7 @@ public class CMCUtils {
    *          anchor last
    * @param signer {@link ContentSigner} for signing the data
    * @return the byte of the signed CMS signature with encapsulated signed data
-   * @throws IOException on error executing the request
+   * @throws CMCMessageException on error executing the request
    */
   public static byte[] signEncapsulatedCMSContent(final ASN1ObjectIdentifier contentType, final ASN1Encodable content,
       final List<X509Certificate> signerCertChain, final ContentSigner signer) throws CMCMessageException {
