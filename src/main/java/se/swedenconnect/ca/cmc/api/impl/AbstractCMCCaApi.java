@@ -258,7 +258,7 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
    *
    * @param cmcRequest CMC request
    * @return CMC response
-   * @throws Exception error parsing this as a valid custom request
+   * @throws CMCException error parsing this as a valid custom request
    */
   protected CMCResponse processCustomRequest(final CMCRequest cmcRequest) throws CMCException {
     final PKIData pkiData = cmcRequest.getPkiData();
