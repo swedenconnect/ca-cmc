@@ -71,8 +71,8 @@ import se.swedenconnect.cert.extensions.data.SemanticsInformation;
  */
 public class CertRequestData {
 
-  public static CertNameModel getCompleteSubjectName() {
-    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getCompleteSubjectName() {
+    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)
         .value("SE").build(),
@@ -113,8 +113,8 @@ public class CertRequestData {
     return subjectName;
   }
 
-  public static CertNameModel getTypicalSubejctName(String givenName, String surname, String id) {
-    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getTypicalSubejctName(String givenName, String surname, String id) {
+    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)
         .value("SE").build(),
@@ -134,8 +134,8 @@ public class CertRequestData {
     return subjectName;
   }
 
-  public static CertNameModel getTypicalServiceName(String commonName, String country) {
-    CertNameModel subjectName = new ExplicitCertNameModel(Arrays.asList(
+  public static CertNameModel<?> getTypicalServiceName(String commonName, String country) {
+    CertNameModel<?> subjectName = new ExplicitCertNameModel(Arrays.asList(
       AttributeTypeAndValueModel.builder()
         .attributeType(CertAttributes.C)
         .value(country).build(),

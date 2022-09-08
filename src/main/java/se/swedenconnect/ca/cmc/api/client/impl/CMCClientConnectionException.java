@@ -13,46 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package se.swedenconnect.ca.cmc.auth;
+package se.swedenconnect.ca.cmc.api.client.impl;
 
 import se.swedenconnect.ca.cmc.CMCException;
 
 /**
- * Exception thrown during CMC validation
+ * Exception class for connection errors against the CA.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCValidationException extends CMCException {
+public class CMCClientConnectionException extends CMCException {
 
-  private static final long serialVersionUID = -7894074545287404113L;
+  /** For serializing. */
+  private static final long serialVersionUID = -1037287830752232733L;
 
   /**
-   * Constructor
+   * Constructor accepting the error message.
    *
-   * @param message message
+   * @param message the error message
    */
-  public CMCValidationException(String message) {
+  public CMCClientConnectionException(final String message) {
     super(message);
   }
 
   /**
-   * Constructor
+   * Constructor accepting the cause of the error.
    *
-   * @param message message
-   * @param cause cause
+   * @param cause the cause of the error
    */
-  public CMCValidationException(String message, Throwable cause) {
-    super(message, cause);
+  public CMCClientConnectionException(final Throwable cause) {
+    super(cause);
   }
 
   /**
-   * Constructor
+   * Constructor accepting the error message and the cause of the error.
    *
-   * @param cause cause
+   * @param message the error message
+   * @param cause the cause of the error
    */
-  public CMCValidationException(Throwable cause) {
-    super(cause);
+  public CMCClientConnectionException(final String message, final Throwable cause) {
+    super(message, cause);
   }
 
 }

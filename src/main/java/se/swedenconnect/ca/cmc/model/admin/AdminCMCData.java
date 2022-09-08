@@ -21,7 +21,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Data class holding any Admin request or response data in a CMC request regInfo attribute or a CMC response responseInfo attribute
+ * Data class holding any Admin request or response data in a CMC request regInfo attribute or a CMC response
+ * responseInfo attribute.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -33,14 +34,15 @@ import lombok.NoArgsConstructor;
 public class AdminCMCData {
 
   /**
-   * Type of admin request
+   * Type of admin request.
    *
    * @param adminRequestType admin request type
    * @return admin request type
    */
   private AdminRequestType adminRequestType;
+
   /**
-   * Admin request/response data
+   * Admin request/response data.
    *
    * @param data data
    * @return data

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Agency for Digital Government (DIGG)
+ * Copyright 2021-2022. Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 
 /**
  * The main interface for the CMC API used by a CA service to process a CMC request from a CMC client and
- * to return a suitable CMC response
+ * to return a suitable CMC response.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -27,13 +27,13 @@ import se.swedenconnect.ca.cmc.api.data.CMCResponse;
 public interface CMCCaApi {
 
   /**
-   * Process a CMC Request in the context of a CA service. This function shall never throw an exception caused by
+   * Processes a CMC Request in the context of a CA service. This function shall never throw an exception caused by
    * errors in the request. Any such error condition is captured in an error response with appropriate error code
    * and a suitable error message.
    *
    * @param cmcRequestBytes the CMC request providing a request for service
    * @return a CMC response providing the status and result data as a result of the service request
    */
-  CMCResponse processRequest (byte[] cmcRequestBytes);
+  CMCResponse processRequest(final byte[] cmcRequestBytes);
 
 }

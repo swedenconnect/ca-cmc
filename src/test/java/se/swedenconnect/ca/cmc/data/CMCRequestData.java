@@ -15,7 +15,12 @@
  */
 package se.swedenconnect.ca.cmc.data;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
 import se.swedenconnect.ca.cmc.model.admin.request.ListCerts;
@@ -25,10 +30,6 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * CMC Request data
@@ -48,7 +49,7 @@ public class CMCRequestData {
   public static final String STATIC_CA_INFO = "staticCaInfo";
   public static final String LIST_CERT_SERIALS = "listSerials";
 
-  public static Map<String, CertNameModel> subjectMap;
+  public static Map<String, CertNameModel<?>> subjectMap;
   public static Map<String, AdminCMCData> adminRequestMap;
 
 

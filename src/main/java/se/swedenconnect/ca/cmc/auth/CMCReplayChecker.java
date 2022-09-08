@@ -17,8 +17,6 @@ package se.swedenconnect.ca.cmc.auth;
 
 import org.bouncycastle.cms.CMSSignedData;
 
-import java.io.IOException;
-
 /**
  * Interface for implementation of a replay checker used by the CMC parser to determine if a CMC request is new and not
  * a replay of an old request.
@@ -32,8 +30,8 @@ public interface CMCReplayChecker {
    * Validates a CMC request against replay according to a defined policy
    *
    * @param cmsSignedData the signed CMC request data
-   * @throws IOException if a violation of the replay protection policy is detected
+   * @throws CMCReplayException if a violation of the replay protection policy is detected
    */
-  void validate(CMSSignedData cmsSignedData) throws IOException;
+  void validate(final CMSSignedData cmsSignedData) throws CMCReplayException;
 
 }

@@ -17,31 +17,21 @@ package se.swedenconnect.ca.cmc.api;
 
 import lombok.Getter;
 
-import java.io.IOException;
-
 /**
- * Exception for errors parsing CMC data
+ * Exception for errors parsing CMC data.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCParsingException extends IOException {
+public class CMCParsingException extends CMCMessageException {
 
   private static final long serialVersionUID = 6145163073622794784L;
 
   /**
    * Nonce data of the CMC object
    */
-  @Getter private final byte[] nonce;
-
-  /**
-   * Constructor
-   *
-   * @param nonce nonce
-   */
-  public CMCParsingException(byte[] nonce) {
-    this.nonce = nonce;
-  }
+  @Getter
+  private final byte[] nonce;
 
   /**
    * Constructor
@@ -49,7 +39,7 @@ public class CMCParsingException extends IOException {
    * @param message message
    * @param nonce nonce
    */
-  public CMCParsingException(String message, byte[] nonce) {
+  public CMCParsingException(final String message, final byte[] nonce) {
     super(message);
     this.nonce = nonce;
   }
@@ -61,7 +51,7 @@ public class CMCParsingException extends IOException {
    * @param cause cause
    * @param nonce nonce
    */
-  public CMCParsingException(String message, Throwable cause, byte[] nonce) {
+  public CMCParsingException(final String message, final Throwable cause, final byte[] nonce) {
     super(message, cause);
     this.nonce = nonce;
   }
@@ -72,7 +62,7 @@ public class CMCParsingException extends IOException {
    * @param cause cause
    * @param nonce nonce
    */
-  public CMCParsingException(Throwable cause, byte[] nonce) {
+  public CMCParsingException(final Throwable cause, final byte[] nonce) {
     super(cause);
     this.nonce = nonce;
   }

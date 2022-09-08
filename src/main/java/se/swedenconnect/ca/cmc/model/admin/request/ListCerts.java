@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 
 /**
- * Date for a list certificates admin request
+ * Date for a list certificates admin request.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -33,15 +33,19 @@ import se.swedenconnect.ca.engine.ca.repository.SortBy;
 @Builder
 public class ListCerts {
 
-  /** indicates of the returned certificates should be limited to currently valid and not revoked certificates */
+  /** Indicates of the returned certificates should be limited to currently valid and not revoked certificates. */
   private boolean notRevoked;
-  /** Indicates the preferred sort order */
+
+  /** Indicates the preferred sort order. */
   private SortBy sortBy;
-  /** The page size specifying the number of certificates to be returned, if available */
+
+  /** The page size specifying the number of certificates to be returned, if available. */
   private int pageSize;
-  /** The index of the page of certificates to return */
+
+  /** The index of the page of certificates to return. */
   private int pageIndex;
-  /** The sort direction. Set to true to list the last item first */
+
+  /** The sort direction. Set to true to list the last item first. */
   private boolean descending;
 
 }

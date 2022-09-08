@@ -16,17 +16,13 @@
 package se.swedenconnect.ca.cmc.model.response.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
 import lombok.Getter;
-import org.bouncycastle.asn1.cmc.BodyPartID;
-import se.swedenconnect.ca.cmc.api.data.CMCFailType;
+import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
-import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * Response model for creating CMC responses for Admin requests
@@ -37,28 +33,30 @@ import java.util.List;
 public class CMCAdminResponseModel extends AbstractCMCResponseModel {
 
   /** Admin CMC data */
-  @Getter private AdminCMCData adminCMCData;
+  @Getter
+  private final AdminCMCData adminCMCData;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param nonce response nonce
    * @param cmcResponseStatus response status
    * @param cmcRequestType request type
    * @param adminCMCData custom admin response data
-   * @throws IOException errors parsing admin response data
+   * @throws CMCMessageException errors parsing admin response data
    */
-  public CMCAdminResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, AdminCMCData adminCMCData) throws IOException {
+  public CMCAdminResponseModel(final byte[] nonce, final CMCResponseStatus cmcResponseStatus,
+      final CMCRequestType cmcRequestType, final AdminCMCData adminCMCData) throws CMCMessageException {
     super(nonce, cmcResponseStatus, cmcRequestType, getResponseInfo(adminCMCData));
     this.adminCMCData = adminCMCData;
   }
 
-  private static byte[] getResponseInfo(AdminCMCData adminCMCData) throws IOException {
+  private static byte[] getResponseInfo(final AdminCMCData adminCMCData) throws CMCMessageException {
     try {
       return CMCUtils.OBJECT_MAPPER.writeValueAsBytes(adminCMCData);
     }
-    catch (JsonProcessingException e) {
-      throw new IOException("Unable to convert admin request data to JSON", e);
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Unable to convert admin request data to JSON", e);
     }
   }
 

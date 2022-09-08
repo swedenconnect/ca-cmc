@@ -15,9 +15,17 @@
  */
 package se.swedenconnect.ca.cmc.ca;
 
-import lombok.Getter;
+import java.io.File;
+import java.security.PublicKey;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
 import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.cert.X509CertificateHolder;
+
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuer;
 import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuerModel;
@@ -39,15 +47,6 @@ import se.swedenconnect.ca.engine.revocation.crl.impl.DefaultCRLIssuer;
 import se.swedenconnect.ca.engine.revocation.ocsp.OCSPResponder;
 import se.swedenconnect.security.credential.PkiCredential;
 
-import java.io.File;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 /**
  * CA service for test
  *
@@ -57,19 +56,19 @@ import java.util.List;
 public class TestCAService extends AbstractCAService<DefaultCertificateModelBuilder> {
 
   private final File crlFile;
-  @Getter private CertificateIssuer certificateIssuer;
+  private CertificateIssuer certificateIssuer;
   private CRLIssuer crlIssuer;
   private List<String> crlDistributionPoints;
   private OCSPResponder ocspResponder;
   private X509CertificateHolder ocspResponderCertificate;
-  @Getter private String ocspResponderUrl;
+  private String ocspResponderUrl;
 
   public TestCAService(PkiCredential issuerCredential, CARepository caRepository,
-    File crlFile, String algorithm) throws Exception {
+      File crlFile, String algorithm) throws Exception {
     super(issuerCredential, caRepository);
     this.crlFile = crlFile;
     this.certificateIssuer = new BasicCertificateIssuer(
-      new CertificateIssuerModel(algorithm, Duration.ofDays(3652)), issuerCredential);
+        new CertificateIssuerModel(algorithm, Duration.ofDays(3652)), issuerCredential);
     CRLIssuerModel crlIssuerModel = getCrlIssuerModel(getCaRepository().getCRLRevocationDataProvider(), algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
@@ -80,76 +79,86 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
   }
 
   private CRLIssuerModel getCrlIssuerModel(CRLRevocationDataProvider crlRevocationDataProvider, String algorithm)
-    throws CertificateRevocationException {
+      throws CertificateRevocationException {
     try {
       return new CRLIssuerModel(getCaCertificate(), algorithm,
-        Duration.ofHours(2), crlRevocationDataProvider, TestCAHolder.getFileUrl(crlFile));
+          Duration.ofHours(2), crlRevocationDataProvider, TestCAHolder.getFileUrl(crlFile));
     }
     catch (Exception e) {
       throw new CertificateRevocationException(e);
     }
   }
 
-  @Override public CertificateIssuer getCertificateIssuer() {
+  @Override
+  public CertificateIssuer getCertificateIssuer() {
     return certificateIssuer;
   }
 
-  @Override protected CRLIssuer getCrlIssuer() {
+  @Override
+  protected CRLIssuer getCrlIssuer() {
     return crlIssuer;
   }
 
-  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl, X509CertificateHolder ocspResponderCertificate) {
+  public void setOcspResponder(OCSPResponder ocspResponder, String ocspResponderUrl,
+      X509CertificateHolder ocspResponderCertificate) {
     this.ocspResponder = ocspResponder;
     this.ocspResponderUrl = ocspResponderUrl;
     this.ocspResponderCertificate = ocspResponderCertificate;
   }
 
-
-  @Override public OCSPResponder getOCSPResponder() {
+  @Override
+  public OCSPResponder getOCSPResponder() {
     return ocspResponder;
   }
 
-  @Override public X509CertificateHolder getOCSPResponderCertificate() {
+  @Override
+  public X509CertificateHolder getOCSPResponderCertificate() {
     return ocspResponderCertificate;
   }
 
-  @Override public String getCaAlgorithm() {
+  @Override
+  public String getCaAlgorithm() {
     return certificateIssuer.getCertificateIssuerModel().getAlgorithm();
   }
 
-  @Override public List<String> getCrlDpURLs() {
+  @Override
+  public List<String> getCrlDpURLs() {
     return crlDistributionPoints;
   }
 
-  @Override public String getOCSPResponderURL() {
+  @Override
+  public String getOCSPResponderURL() {
     return ocspResponderUrl;
   }
 
-  @Override protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel subject, PublicKey publicKey,
-    X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel) throws CertificateIssuanceException {
-    DefaultCertificateModelBuilder certModelBuilder = DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),
-      certificateIssuerModel);
+  @Override
+  protected DefaultCertificateModelBuilder getBaseCertificateModelBuilder(CertNameModel<?> subject, PublicKey publicKey,
+      X509CertificateHolder issuerCertificate, CertificateIssuerModel certificateIssuerModel)
+      throws CertificateIssuanceException {
+    DefaultCertificateModelBuilder certModelBuilder =
+        DefaultCertificateModelBuilder.getInstance(publicKey, getCaCertificate(),
+            certificateIssuerModel);
     certModelBuilder
-      .subject(subject)
-      .includeAki(true)
-      .includeSki(true)
-      .basicConstraints(new BasicConstraintsModel(true, true))
-      .keyUsage(new KeyUsageModel(KeyUsage.digitalSignature))
-      .crlDistributionPoints(crlDistributionPoints.isEmpty() ? null : crlDistributionPoints)
-      .ocspServiceUrl(ocspResponder != null ? ocspResponderUrl : null)
-      .authenticationContext(SAMLAuthContextBuilder.instance()
-        .assertionRef("1234567890")
-        .serviceID("SignService")
-        .authenticationInstant(new Date())
-        .authnContextClassRef("http://id.example.com/loa3")
-        .attributeMappings(Arrays.asList(AttributeMappingBuilder.instance()
-            .friendlyName("commonName")
-            .name("urn:oid:2.5.4.3")
-            .nameFormat("http://example.com/nameFormatUri")
-            .ref("1.2.3.4")
-            .type(AttributeRefType.rdn)
-          .build()))
-        .build());
+        .subject(subject)
+        .includeAki(true)
+        .includeSki(true)
+        .basicConstraints(new BasicConstraintsModel(true, true))
+        .keyUsage(new KeyUsageModel(KeyUsage.digitalSignature))
+        .crlDistributionPoints(crlDistributionPoints.isEmpty() ? null : crlDistributionPoints)
+        .ocspServiceUrl(ocspResponder != null ? ocspResponderUrl : null)
+        .authenticationContext(SAMLAuthContextBuilder.instance()
+            .assertionRef("1234567890")
+            .serviceID("SignService")
+            .authenticationInstant(new Date())
+            .authnContextClassRef("http://id.example.com/loa3")
+            .attributeMappings(Arrays.asList(AttributeMappingBuilder.instance()
+                .friendlyName("commonName")
+                .name("urn:oid:2.5.4.3")
+                .nameFormat("http://example.com/nameFormatUri")
+                .ref("1.2.3.4")
+                .type(AttributeRefType.rdn)
+                .build()))
+            .build());
     return certModelBuilder;
   }
 

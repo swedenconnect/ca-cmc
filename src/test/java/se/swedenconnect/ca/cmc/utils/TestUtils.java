@@ -16,30 +16,6 @@
 
 package se.swedenconnect.ca.cmc.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
-import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
-import org.bouncycastle.asn1.x500.RDN;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.asn1.x500.style.IETFUtils;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.util.encoders.Base64;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
-import se.swedenconnect.ca.cmc.ca.TestCA;
-import se.swedenconnect.ca.cmc.ca.TestCAHolder;
-import se.swedenconnect.ca.cmc.ca.TestServices;
-import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +32,36 @@ import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERIA5String;
+import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.sec.SECObjectIdentifiers;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.asn1.x500.style.IETFUtils;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import se.swedenconnect.ca.cmc.ca.TestCA;
+import se.swedenconnect.ca.cmc.ca.TestCAHolder;
+import se.swedenconnect.ca.cmc.ca.TestServices;
+import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 
 /**
  * Utility functions for test
@@ -93,7 +99,6 @@ public class TestUtils {
 
   public static KeyPair generateKeyPair(KeyType algorithm, Object spec) throws NoSuchAlgorithmException,
     InvalidAlgorithmParameterException {
-    KeyPair kp;
     KeyPairGenerator generator;
     generator = KeyPairGenerator.getInstance(algorithm.name(), new BouncyCastleProvider());
     if (spec instanceof AlgorithmParameterSpec) {
@@ -187,7 +192,6 @@ public class TestUtils {
     pemWriter.writeObject(pemObject);
     pemWriter.close();
     strWr.close();
-    PEMParser pp;
     return strWr.toString();
   }
 

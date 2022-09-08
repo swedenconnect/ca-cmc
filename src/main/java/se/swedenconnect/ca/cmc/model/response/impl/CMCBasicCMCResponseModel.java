@@ -15,16 +15,17 @@
  */
 package se.swedenconnect.ca.cmc.model.response.impl;
 
-import org.bouncycastle.cert.X509CertificateHolder;
-import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
-import se.swedenconnect.ca.engine.utils.CAUtils;
-
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.bouncycastle.cert.X509CertificateHolder;
+
+import se.swedenconnect.ca.cmc.api.data.CMCResponseStatus;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
+import se.swedenconnect.ca.engine.utils.CAUtils;
 
 /**
  * Generic CMC response model for creating CMC responses
@@ -35,19 +36,20 @@ import java.util.List;
 public class CMCBasicCMCResponseModel extends AbstractCMCResponseModel {
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param nonce nonce
    * @param cmcResponseStatus response status
    * @param cmcRequestType request type
    * @param responseInfo custom response data
    */
-  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, byte[] responseInfo) {
+  public CMCBasicCMCResponseModel(final byte[] nonce, final CMCResponseStatus cmcResponseStatus,
+      final CMCRequestType cmcRequestType, final byte[] responseInfo) {
     super(nonce, cmcResponseStatus, cmcRequestType, responseInfo);
   }
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param nonce nonce
    * @param cmcResponseStatus response status
@@ -57,26 +59,32 @@ public class CMCBasicCMCResponseModel extends AbstractCMCResponseModel {
    * @throws CertificateException error parsing certificate data
    * @throws IOException error parsing custom response data
    */
-  public CMCBasicCMCResponseModel(byte[] nonce, CMCResponseStatus cmcResponseStatus, CMCRequestType cmcRequestType, byte[] responseInfo, List<?> returnCertificates)
-    throws CertificateException, IOException {
+  public CMCBasicCMCResponseModel(final byte[] nonce, final CMCResponseStatus cmcResponseStatus,
+      final CMCRequestType cmcRequestType, final byte[] responseInfo, final List<?> returnCertificates)
+      throws CertificateException, IOException {
     super(nonce, cmcResponseStatus, cmcRequestType, responseInfo);
-    addCertificates(returnCertificates);
+    this.addCertificates(returnCertificates);
   }
 
-  private void addCertificates(List<?> returnCertificates) throws CertificateException, IOException {
-    List<X509Certificate> certDataList = new ArrayList<>();
-    for (Object o : returnCertificates){
-      if (o instanceof X509Certificate) {
-        certDataList.add((X509Certificate)o);
-        continue;
+  private void addCertificates(final List<?> returnCertificates) throws CertificateException {
+    try {
+      final List<X509Certificate> certDataList = new ArrayList<>();
+      for (final Object o : returnCertificates) {
+        if (o instanceof X509Certificate) {
+          certDataList.add((X509Certificate) o);
+          continue;
+        }
+        if (o instanceof X509CertificateHolder) {
+          certDataList.add(CAUtils.getCert((X509CertificateHolder) o));
+          continue;
+        }
+        throw new CertificateException("Illegal certificate type");
       }
-      if (o instanceof X509CertificateHolder) {
-        certDataList.add(CAUtils.getCert((X509CertificateHolder)o));
-        continue;
-      }
-      throw new IOException("Illegal certificate type");
+      this.setReturnCertificates(certDataList);
     }
-    setReturnCertificates(certDataList);
+    catch (final IOException e) {
+      throw new CertificateException("Invalid certificate", e);
+    }
   }
 
 }

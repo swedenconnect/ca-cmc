@@ -15,18 +15,16 @@
  */
 package se.swedenconnect.ca.cmc.model.request.impl;
 
+import java.security.SecureRandom;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.bouncycastle.operator.ContentSigner;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestModel;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
-import java.util.List;
 /**
- * Abstract implementation of the CMC request model holding metadata of a CMC request
+ * Abstract implementation of the CMC request model holding metadata of a CMC request.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -37,49 +35,54 @@ public abstract class AbstractCMCRequestModel implements CMCRequestModel {
   private static final SecureRandom RNG = CMCUtils.RNG;
 
   /**
-   * Constructor setting the CMC request type
-   *
-   * @param cmcRequestType CMC request type
-   */
-  public AbstractCMCRequestModel(CMCRequestType cmcRequestType) {
-    this(cmcRequestType, null);
-  }
-
-  /**
-   * Constructor setting CMC request type and registration info
-   * @param cmcRequestType CMC request type
-   * @param registrationInfo registration info
-   */
-  public AbstractCMCRequestModel(CMCRequestType cmcRequestType, byte[] registrationInfo) {
-    this.registrationInfo = registrationInfo;
-    this.cmcRequestType = cmcRequestType;
-    this.nonce = new byte[128];
-    RNG.nextBytes(nonce);
-  }
-
-
-  /**
    * Gets the request nonce
    *
    * @param nonce request nonce
    * @return request nonce
    */
-  @Getter @Setter protected byte[] nonce;
+  @Getter
+  @Setter
+  protected byte[] nonce;
 
   /**
-   * The registration info data. This parameter is generally used to pass custom request data.
-   * Each request type identifies the syntax of this parameter
+   * The registration info data. This parameter is generally used to pass custom request data. Each request type
+   * identifies the syntax of this parameter
    *
    * @param registrationInfo registration info data
    * @return registration info data
    */
-  @Getter @Setter protected byte[] registrationInfo;
+  @Getter
+  @Setter
+  protected byte[] registrationInfo;
 
   /**
    * The type of request
    *
    * @return CMC request type
    */
-  @Getter protected CMCRequestType cmcRequestType;
+  @Getter
+  protected CMCRequestType cmcRequestType;
+
+  /**
+   * Constructor setting the CMC request type.
+   *
+   * @param cmcRequestType CMC request type
+   */
+  public AbstractCMCRequestModel(final CMCRequestType cmcRequestType) {
+    this(cmcRequestType, null);
+  }
+
+  /**
+   * Constructor setting CMC request type and registration info
+   *
+   * @param cmcRequestType CMC request type
+   * @param registrationInfo registration info
+   */
+  public AbstractCMCRequestModel(final CMCRequestType cmcRequestType, final byte[] registrationInfo) {
+    this.registrationInfo = registrationInfo;
+    this.cmcRequestType = cmcRequestType;
+    this.nonce = new byte[128];
+    RNG.nextBytes(this.nonce);
+  }
 
 }

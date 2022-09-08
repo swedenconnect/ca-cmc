@@ -16,20 +16,43 @@
 
 package se.swedenconnect.ca.cmc.utils;
 
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.cmc.*;
-import org.bouncycastle.asn1.crmf.CertReqMsg;
-import org.bouncycastle.cert.crmf.CertificateRequestMessage;
-import org.bouncycastle.util.encoders.Base64;
-import se.swedenconnect.ca.cmc.api.data.*;
-import se.swedenconnect.ca.cmc.auth.CMCUtils;
-import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
-import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import java.util.List;
+
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.DERUTF8String;
+import org.bouncycastle.asn1.cmc.BodyPartID;
+import org.bouncycastle.asn1.cmc.CMCFailInfo;
+import org.bouncycastle.asn1.cmc.CMCStatusInfoV2;
+import org.bouncycastle.asn1.cmc.CertificationRequest;
+import org.bouncycastle.asn1.cmc.GetCert;
+import org.bouncycastle.asn1.cmc.LraPopWitness;
+import org.bouncycastle.asn1.cmc.OtherStatusInfo;
+import org.bouncycastle.asn1.cmc.PKIData;
+import org.bouncycastle.asn1.cmc.PKIResponse;
+import org.bouncycastle.asn1.cmc.RevokeRequest;
+import org.bouncycastle.asn1.cmc.TaggedAttribute;
+import org.bouncycastle.asn1.cmc.TaggedCertificationRequest;
+import org.bouncycastle.asn1.cmc.TaggedRequest;
+import org.bouncycastle.asn1.crmf.CertReqMsg;
+import org.bouncycastle.cert.crmf.CertificateRequestMessage;
+import org.bouncycastle.util.encoders.Base64;
+
+import se.swedenconnect.ca.cmc.api.data.CMCControlObjectID;
+import se.swedenconnect.ca.cmc.api.data.CMCFailType;
+import se.swedenconnect.ca.cmc.api.data.CMCRequest;
+import se.swedenconnect.ca.cmc.api.data.CMCResponse;
+import se.swedenconnect.ca.cmc.api.data.CMCStatusType;
+import se.swedenconnect.ca.cmc.auth.CMCUtils;
+import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
+import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
 /**
  * Test result data printing
@@ -61,11 +84,8 @@ public class CMCDataPrint {
         }
       }
 
-      switch (cmcRequestType) {
-
-      case issueCert:
+      if (cmcRequestType == CMCRequestType.issueCert) {
         printIssueCert(pkiData, includeCertRequest, b);
-        break;
       }
 
       if (includeFullMessage) {
@@ -73,7 +93,8 @@ public class CMCDataPrint {
       }
 
       return b.toString();
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       return "Error parsing CMC request: " + ex.toString() + "\n";
     }
   }
@@ -85,14 +106,14 @@ public class CMCDataPrint {
 
     try {
       StringBuilder b = new StringBuilder();
-      String cmcBase64 = Base64.toBase64String(cmcResponse.getCmcResponseBytes());
+      Base64.toBase64String(cmcResponse.getCmcResponseBytes());
       PKIResponse pkiResponse = cmcResponse.getPkiResponse();
       TaggedAttribute[] responseControlSequence = CMCUtils.getResponseControlSequence(pkiResponse);
       b.append("CMC Request type: ").append(cmcResponse.getCmcRequestType()).append("\n");
       b.append("  time: ").append(CMCUtils.getSigningTime(cmcResponse.getCmcResponseBytes())).append("\n");
       if (responseControlSequence.length > 0) {
         b.append("CMC Control sequence (size=").append(responseControlSequence.length).append(")\n");
-        for (TaggedAttribute csAttr: responseControlSequence){
+        for (TaggedAttribute csAttr : responseControlSequence) {
           CMCControlObjectID controlObjectID = CMCControlObjectID.getControlObjectID(csAttr.getAttrType());
           b.append("  type: ").append(controlObjectID).append("\n");
           printControlValue(null, controlObjectID, csAttr, b);
@@ -101,7 +122,7 @@ public class CMCDataPrint {
 
       List<X509Certificate> returnCertificates = cmcResponse.getReturnCertificates();
       if (returnCertificates != null) {
-        for (X509Certificate certificate: returnCertificates){
+        for (X509Certificate certificate : returnCertificates) {
           b.append("  ReturnCert: ").append(certificate.getSubjectX500Principal()).append("\n");
           b.append("    Certificate bytes:\n").append(base64Print(certificate.getEncoded(), 120)).append("\n");
         }
@@ -112,14 +133,15 @@ public class CMCDataPrint {
       }
 
       return b.toString();
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       return "Error parsing CMC request: " + ex.toString() + "\n";
     }
   }
 
-
-  private static void printControlValue(CMCRequestType cmcRequestType, CMCControlObjectID controlObjectID, TaggedAttribute csAttr,
-    StringBuilder b) {
+  private static void printControlValue(CMCRequestType cmcRequestType, CMCControlObjectID controlObjectID,
+      TaggedAttribute csAttr,
+      StringBuilder b) {
     ASN1Set attrValues = csAttr.getAttrValues();
     for (int i = 0; i < attrValues.size(); i++) {
       ASN1Encodable asn1Encodable = attrValues.getObjectAt(i);
@@ -153,8 +175,7 @@ public class CMCDataPrint {
             String requestData = adminRequestData.getData();
             if (requestData != null) {
               valueStr = TestUtils.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
-                TestUtils.OBJECT_MAPPER.readValue(requestData, Object.class)
-              );
+                  TestUtils.OBJECT_MAPPER.readValue(requestData, Object.class));
               b.append("    request-data:\n").append(valueStr.replaceAll("(?m)^", "      ")).append("\n");
             }
             break;
@@ -185,13 +206,14 @@ public class CMCDataPrint {
           CMCStatusInfoV2 statusInfoV2 = CMCStatusInfoV2.getInstance(asn1Encodable);
           CMCFailType cmcFailType = getCmcFailType(statusInfoV2);
           CMCStatusType cmcStatus = CMCStatusType.getCMCStatusType(statusInfoV2.getcMCStatus());
+          @SuppressWarnings("deprecation")
           DERUTF8String statusString = statusInfoV2.getStatusString();
           b.append("    CMC status: ").append(cmcStatus).append("\n");
           BodyPartID[] bodyList = statusInfoV2.getBodyList();
-          for (BodyPartID bodyPartID:bodyList) {
+          for (BodyPartID bodyPartID : bodyList) {
             b.append("      Processed object: ").append(bodyPartID.getID()).append("\n");
           }
-          if (cmcFailType != null){
+          if (cmcFailType != null) {
             b.append("    CMC fail info: ").append(cmcFailType).append("\n");
           }
           if (statusString != null) {
@@ -206,11 +228,11 @@ public class CMCDataPrint {
             String responseData = adminCMCData.getData();
             if (responseData != null) {
               valueStr = TestUtils.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
-                TestUtils.OBJECT_MAPPER.readValue(responseData, Object.class)
-              );
+                  TestUtils.OBJECT_MAPPER.readValue(responseData, Object.class));
               b.append("    response-data:\n").append(valueStr.replaceAll("(?m)^", "      ")).append("\n");
             }
-          } catch (Exception ex) {
+          }
+          catch (Exception ex) {
             // This was not admin json data. Check if this is a string value
             String responseInfoString = TestUtils.getStringRepresentation(responseInfoData);
             b.append("    response-data: ").append(responseInfoString).append("\n");
@@ -218,8 +240,8 @@ public class CMCDataPrint {
           break;
         default:
           b.append("    Encoded control data: ")
-            .append(Base64.toBase64String(asn1Encodable.toASN1Primitive().getEncoded(ASN1Encoding.DER)))
-            .append("\n");
+              .append(Base64.toBase64String(asn1Encodable.toASN1Primitive().getEncoded(ASN1Encoding.DER)))
+              .append("\n");
           break;
         }
       }
@@ -232,7 +254,7 @@ public class CMCDataPrint {
 
   public static CMCFailType getCmcFailType(CMCStatusInfoV2 statusInfoV2) {
     OtherStatusInfo otherStatusInfo = statusInfoV2.getOtherStatusInfo();
-    if (otherStatusInfo != null && otherStatusInfo.isFailInfo()){
+    if (otherStatusInfo != null && otherStatusInfo.isFailInfo()) {
       CMCFailInfo cmcFailInfo = CMCFailInfo.getInstance(otherStatusInfo.toASN1Primitive());
       return CMCFailType.getCMCFailType(cmcFailInfo);
     }
@@ -251,18 +273,21 @@ public class CMCDataPrint {
         b.append("  Certificate request: PKCS#10 Certificate Request\n");
         b.append("    Body part ID: ").append(certReqBodyPartId.getID()).append("\n");
         if (includeCertRequest) {
-          b.append("    Certificate Request:\n").append(base64Print(certificationRequest.getEncoded(ASN1Encoding.DER), 120)).append("\n");
+          b.append("    Certificate Request:\n")
+              .append(base64Print(certificationRequest.getEncoded(ASN1Encoding.DER), 120)).append("\n");
         }
         return;
       }
       if (taggedRequestValue instanceof CertReqMsg) {
-        CertificateRequestMessage certificateRequestMessage = new CertificateRequestMessage((CertReqMsg) taggedRequestValue);
+        CertificateRequestMessage certificateRequestMessage =
+            new CertificateRequestMessage((CertReqMsg) taggedRequestValue);
         ASN1Integer certReqId = ((CertReqMsg) taggedRequestValue).getCertReq().getCertReqId();
         BodyPartID certReqBodyPartId = new BodyPartID(certReqId.longValueExact());
         b.append("  Certificate request: CRMF Certificate Request Message\n");
         b.append("    Body part ID: ").append(certReqBodyPartId.getID()).append("\n");
-        if (includeCertRequest){
-          b.append("    Certificate Request:\n").append(base64Print(certificateRequestMessage.getEncoded(), 120)).append("\n");
+        if (includeCertRequest) {
+          b.append("    Certificate Request:\n").append(base64Print(certificateRequestMessage.getEncoded(), 120))
+              .append("\n");
         }
         return;
       }

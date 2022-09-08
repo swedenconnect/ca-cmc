@@ -15,7 +15,17 @@
  */
 package se.swedenconnect.ca.cmc.api.impl;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import se.swedenconnect.ca.cmc.CMCException;
+import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.CMCRequestParser;
 import se.swedenconnect.ca.cmc.api.CMCResponseFactory;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
@@ -29,19 +39,14 @@ import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
- * The default admin implementation of the CMC CA API. This implementation extends the AbstractCMCCaApi which
- * provides the basic CMC API features. This implementation extends this with a default implementation of
- * a handler of admin API requests.
+ * The default admin implementation of the CMC CA API. This implementation extends the AbstractCMCCaApi which provides
+ * the basic CMC API features. This implementation extends this with a default implementation of a handler of admin API
+ * requests.
  *
  * <p>
- * Note that the admin CMC requests are using a custom protocol structure adding to standardized CMC using generic
- * data transfer. A CMC API that does not implement the admin features would directly implement the AbstractCMCCaApi class.
+ * Note that the admin CMC requests are using a custom protocol structure adding to standardized CMC using generic data
+ * transfer. A CMC API that does not implement the admin features would directly implement the AbstractCMCCaApi class.
  * </p>
  *
  * @author Martin Lindström (martin@idsec.se)
@@ -56,102 +61,126 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
    * @param cmcRequestParser parser for parsing CMC requests
    * @param cmcResponseFactory factory for creating CMC responses
    */
-  public AbstractAdminCMCCaApi(CAService caService,
-    CMCRequestParser cmcRequestParser, CMCResponseFactory cmcResponseFactory) {
+  public AbstractAdminCMCCaApi(final CAService caService,
+      final CMCRequestParser cmcRequestParser, final CMCResponseFactory cmcResponseFactory) {
     super(caService, cmcRequestParser, cmcResponseFactory);
   }
 
   /** {@inheritDoc} */
-  @Override protected AdminCMCData getAdminResponse(AdminCMCData adminRequest) throws Exception {
+  @Override
+  protected AdminCMCData getAdminResponse(final AdminCMCData adminRequest) throws CMCException {
 
-    AdminRequestType adminRequestType = adminRequest.getAdminRequestType();
+    final AdminRequestType adminRequestType = adminRequest.getAdminRequestType();
     String responseInfo = null;
 
     switch (adminRequestType) {
     case caInfo:
-      responseInfo = getCAInfoResponse();
+      responseInfo = this.getCAInfoResponse();
       break;
     case staticCaInfo:
-      responseInfo = getStaticCAInfoResponse();
+      responseInfo = this.getStaticCAInfoResponse();
       break;
     case listCerts:
-      ListCerts listCertsReqeust = CMCUtils.OBJECT_MAPPER.readValue(adminRequest.getData(), ListCerts.class);
-      responseInfo = getListCertsResponse(listCertsReqeust);
+      final ListCerts listCertsRequest;
+      try {
+        listCertsRequest = CMCUtils.OBJECT_MAPPER.readValue(adminRequest.getData(), ListCerts.class);
+      }
+      catch (final JsonProcessingException e) {
+        throw new CMCMessageException("Failed to get list certs", e);
+      }
+      responseInfo = this.getListCertsResponse(listCertsRequest);
       break;
     case allCertSerials:
-      responseInfo = getAllCertSerials();
+      responseInfo = this.getAllCertSerials();
       break;
     }
 
     return AdminCMCData.builder()
-      .adminRequestType(adminRequestType)
-      .data(responseInfo)
-      .build();
+        .adminRequestType(adminRequestType)
+        .data(responseInfo)
+        .build();
   }
 
-  private String getAllCertSerials() throws JsonProcessingException {
-    List<BigInteger> allCertificates = caService.getCaRepository().getAllCertificates();
-    List<String> allCertSerialStrings = allCertificates.stream()
-      .map(bigInteger -> bigInteger.toString(16))
-      .collect(Collectors.toList());
-    return CMCUtils.OBJECT_MAPPER.writeValueAsString(allCertSerialStrings);
+  private String getAllCertSerials() throws CMCMessageException {
+    final List<BigInteger> allCertificates = this.caService.getCaRepository().getAllCertificates();
+    final List<String> allCertSerialStrings = allCertificates.stream()
+        .map(bigInteger -> bigInteger.toString(16))
+        .collect(Collectors.toList());
+    try {
+      return CMCUtils.OBJECT_MAPPER.writeValueAsString(allCertSerialStrings);
+    }
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Failed to get all cert serials", e);
+    }
   }
 
-  private String getListCertsResponse(ListCerts listCertsReqeust) throws JsonProcessingException {
-    CARepository caRepository = caService.getCaRepository();
-    List<CertificateRecord> certificateRange = caRepository.getCertificateRange(
-      listCertsReqeust.getPageIndex(),
-      listCertsReqeust.getPageSize(),
-      listCertsReqeust.isNotRevoked(),
-      listCertsReqeust.getSortBy(),
-      listCertsReqeust.isDescending()
-    );
+  private String getListCertsResponse(final ListCerts listCertsReqeust) throws CMCMessageException {
+    final CARepository caRepository = this.caService.getCaRepository();
+    final List<CertificateRecord> certificateRange = caRepository.getCertificateRange(
+        listCertsReqeust.getPageIndex(),
+        listCertsReqeust.getPageSize(),
+        listCertsReqeust.isNotRevoked(),
+        listCertsReqeust.getSortBy(),
+        listCertsReqeust.isDescending());
 
-    List<CertificateData> certificateDataList = new ArrayList<>();
-    for (CertificateRecord certificateRecord : certificateRange) {
-      CertificateData.CertificateDataBuilder builder = CertificateData.builder()
-        .certificate(certificateRecord.getCertificate())
-        .revoked(certificateRecord.isRevoked());
+    final List<CertificateData> certificateDataList = new ArrayList<>();
+    for (final CertificateRecord certificateRecord : certificateRange) {
+      final CertificateData.CertificateDataBuilder builder = CertificateData.builder()
+          .certificate(certificateRecord.getCertificate())
+          .revoked(certificateRecord.isRevoked());
 
       if (certificateRecord.isRevoked()) {
         builder
-          .revocationReason(certificateRecord.getReason())
-          .revocationDate(certificateRecord.getRevocationTime().getTime());
+            .revocationReason(certificateRecord.getReason())
+            .revocationDate(certificateRecord.getRevocationTime().getTime());
       }
       certificateDataList.add(builder.build());
     }
-    return CMCUtils.OBJECT_MAPPER.writeValueAsString(certificateDataList);
+    try {
+      return CMCUtils.OBJECT_MAPPER.writeValueAsString(certificateDataList);
+    }
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Failed to create list certs response", e);
+    }
   }
 
-  private String getCAInfoResponse() throws Exception {
-    CARepository caRepository = caService.getCaRepository();
-    CAInformation caInformation = CAInformation.builder()
-      .validCertificateCount(caRepository.getCertificateCount(true))
-      .certificateCount(caRepository.getCertificateCount(false))
-      .certificateChain(CMCUtils.getCerHolderByteList(caService.getCACertificateChain()))
-      .ocspCertificate(caService.getOCSPResponderCertificate() != null
-        ? caService.getOCSPResponderCertificate().getEncoded()
-        : null)
-      .caAlgorithm(caService.getCaAlgorithm())
-      .ocspResponserUrl(caService.getOCSPResponderURL())
-      .crlDpURLs(caService.getCrlDpURLs())
-      .build();
-    return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
+  private String getCAInfoResponse() throws CMCMessageException {
+    try {
+      final CARepository caRepository = this.caService.getCaRepository();
+      final CAInformation caInformation = CAInformation.builder()
+          .validCertificateCount(caRepository.getCertificateCount(true))
+          .certificateCount(caRepository.getCertificateCount(false))
+          .certificateChain(CMCUtils.getCerHolderByteList(this.caService.getCACertificateChain()))
+          .ocspCertificate(this.caService.getOCSPResponderCertificate() != null
+              ? this.caService.getOCSPResponderCertificate().getEncoded()
+              : null)
+          .caAlgorithm(this.caService.getCaAlgorithm())
+          .ocspResponserUrl(this.caService.getOCSPResponderURL())
+          .crlDpURLs(this.caService.getCrlDpURLs())
+          .build();
+      return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
+    }
+    catch (final IOException | CertificateException e) {
+      throw new CMCMessageException("Failed to create CA info response", e);
+    }
   }
 
-  private String getStaticCAInfoResponse() throws Exception {
-    StaticCAInformation caInformation = StaticCAInformation.builder()
-      .certificateChain(CMCUtils.getCerHolderByteList(caService.getCACertificateChain()))
-      .ocspCertificate(caService.getOCSPResponderCertificate() != null
-        ? caService.getOCSPResponderCertificate().getEncoded()
-        : null)
-      .caAlgorithm(caService.getCaAlgorithm())
-      .ocspResponserUrl(caService.getOCSPResponderURL())
-      .crlDpURLs(caService.getCrlDpURLs())
-      .build();
-    return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
+  private String getStaticCAInfoResponse() throws CMCMessageException {
+    try {
+      final StaticCAInformation caInformation = StaticCAInformation.builder()
+          .certificateChain(CMCUtils.getCerHolderByteList(this.caService.getCACertificateChain()))
+          .ocspCertificate(this.caService.getOCSPResponderCertificate() != null
+              ? this.caService.getOCSPResponderCertificate().getEncoded()
+              : null)
+          .caAlgorithm(this.caService.getCaAlgorithm())
+          .ocspResponserUrl(this.caService.getOCSPResponderURL())
+          .crlDpURLs(this.caService.getCrlDpURLs())
+          .build();
+      return CMCUtils.OBJECT_MAPPER.writeValueAsString(caInformation);
+    }
+    catch (final IOException | CertificateException e) {
+      throw new CMCMessageException("Failed to create static CA info response", e);
+    }
   }
-
-
 
 }

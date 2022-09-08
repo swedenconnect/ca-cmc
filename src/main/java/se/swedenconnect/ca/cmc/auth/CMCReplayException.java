@@ -18,41 +18,42 @@ package se.swedenconnect.ca.cmc.auth;
 import se.swedenconnect.ca.cmc.CMCException;
 
 /**
- * Exception thrown during CMC validation
+ * For replay checking errors.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCValidationException extends CMCException {
+public class CMCReplayException extends CMCException {
 
-  private static final long serialVersionUID = -7894074545287404113L;
+  /** For serializing. */
+  private static final long serialVersionUID = 8417348529146156571L;
 
   /**
-   * Constructor
+   * Constructor accepting the error message.
    *
-   * @param message message
+   * @param message the error message
    */
-  public CMCValidationException(String message) {
+  public CMCReplayException(final String message) {
     super(message);
   }
 
   /**
-   * Constructor
+   * Constructor accepting the cause of the error.
    *
-   * @param message message
-   * @param cause cause
+   * @param cause the cause of the error
    */
-  public CMCValidationException(String message, Throwable cause) {
-    super(message, cause);
+  public CMCReplayException(final Throwable cause) {
+    super(cause);
   }
 
   /**
-   * Constructor
+   * Constructor accepting the error message and the cause of the error.
    *
-   * @param cause cause
+   * @param message the error message
+   * @param cause the cause of the error
    */
-  public CMCValidationException(Throwable cause) {
-    super(cause);
+  public CMCReplayException(final String message, final Throwable cause) {
+    super(message, cause);
   }
 
 }

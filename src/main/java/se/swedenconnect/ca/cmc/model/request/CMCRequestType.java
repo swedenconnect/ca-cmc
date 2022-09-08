@@ -18,18 +18,22 @@ package se.swedenconnect.ca.cmc.model.request;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 
 /**
- * Enumeration of CMC request types
+ * Enumeration of CMC request types.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
 public enum CMCRequestType {
-  /** A request to issue a certificate */
+
+  /** A request to issue a certificate. */
   issueCert,
-  /** A request to revoke a certificate */
+
+  /** A request to revoke a certificate. */
   revoke,
-  /** A custom Admin request using the {@link AdminCMCData} to further specify the type of admin request*/
+
+  /** A custom admin request using the {@link AdminCMCData} to further specify the type of admin request. */
   admin,
-  /** A request to get a particular certificate from the CA database based on the serial number of the certificate */
+
+  /** A request to get a particular certificate from the CA database based on the serial number of the certificate. */
   getCert
 }

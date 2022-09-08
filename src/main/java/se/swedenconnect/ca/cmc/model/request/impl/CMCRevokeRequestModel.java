@@ -15,18 +15,16 @@
  */
 package se.swedenconnect.ca.cmc.model.request.impl;
 
-import lombok.Getter;
+import java.math.BigInteger;
+import java.util.Date;
+
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.operator.ContentSigner;
+
+import lombok.Getter;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 
-import java.math.BigInteger;
-import java.security.cert.X509Certificate;
-import java.util.Date;
-import java.util.List;
-
 /**
- * CMC Revocation request model
+ * CMC Revocation request model.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -35,24 +33,27 @@ import java.util.List;
 public class CMCRevokeRequestModel extends AbstractCMCRequestModel {
 
   /** Issuer name */
-  private X500Name issuerName;
+  private final X500Name issuerName;
+
   /** Serial number */
-  private BigInteger serialNumber;
+  private final BigInteger serialNumber;
+
   /** Reason code */
-  private int reason;
+  private final int reason;
+
   /** Revocation time */
-  private Date revocationDate;
+  private final Date revocationDate;
 
   /**
-   * Constructor
+   * Constructor.
    *
    * @param serialNumber serial number
    * @param reason reason code
    * @param revocationDate revocation time
    * @param issuerName issuer name
    */
-  public CMCRevokeRequestModel(BigInteger serialNumber, int reason, Date revocationDate,
-    X500Name issuerName) {
+  public CMCRevokeRequestModel(
+      final BigInteger serialNumber, final int reason, final Date revocationDate, final X500Name issuerName) {
     super(CMCRequestType.revoke);
     this.serialNumber = serialNumber;
     this.reason = reason;

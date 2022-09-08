@@ -15,28 +15,24 @@
  */
 package se.swedenconnect.ca.cmc.auth;
 
+import se.swedenconnect.ca.cmc.CMCException;
+
 /**
  * Exception related to CMC authorization decisions.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-public class CMCAuthorizationException extends RuntimeException {
+public class CMCAuthorizationException extends CMCException {
 
   private static final long serialVersionUID = -2749871697534432294L;
-
-  /**
-   * Constructor
-   */
-  public CMCAuthorizationException() {
-  }
 
   /**
    * Constructor
    *
    * @param message message
    */
-  public CMCAuthorizationException(String message) {
+  public CMCAuthorizationException(final String message) {
     super(message);
   }
 
@@ -45,7 +41,7 @@ public class CMCAuthorizationException extends RuntimeException {
    * @param message message
    * @param cause cause
    */
-  public CMCAuthorizationException(String message, Throwable cause) {
+  public CMCAuthorizationException(final String message, final Throwable cause) {
     super(message, cause);
   }
 
@@ -54,19 +50,8 @@ public class CMCAuthorizationException extends RuntimeException {
    *
    * @param cause cause
    */
-  public CMCAuthorizationException(Throwable cause) {
+  public CMCAuthorizationException(final Throwable cause) {
     super(cause);
   }
 
-  /**
-   * Constructor
-   *
-   * @param message message
-   * @param cause cause
-   * @param enableSuppression enable suppression
-   * @param writableStackTrace writable stack trace
-   */
-  public CMCAuthorizationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
 }

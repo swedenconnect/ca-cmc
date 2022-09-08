@@ -15,16 +15,17 @@
  */
 package se.swedenconnect.ca.cmc.api.client.impl;
 
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
-import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import org.apache.commons.io.IOUtils;
+
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
+import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
 
 /**
  * Implementation of the CMC Client HTTP Connector handling communication with the CA service.
@@ -38,48 +39,52 @@ public class CMCClientHttpConnectorImpl implements CMCClientHttpConnector {
 
   private static final String CMC_MIME_TYPE = "application/pkcs7-mime";
 
-  @Override
   /** {@inheritDoc} */
-  public CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl, final int connectTimeout, final int readTimeout) {
+  @Override
+  public CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl,
+      final int connectTimeout, final int readTimeout) {
     try {
-      HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
+      final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
       connection.setRequestMethod("POST");
       connection.setDoOutput(true);
       connection.setRequestProperty("Content-Type", CMC_MIME_TYPE);
       connection.connect();
-      try(OutputStream os = connection.getOutputStream()) {
+      try (OutputStream os = connection.getOutputStream()) {
         os.write(cmcRequestBytes);
       }
       connection.setConnectTimeout(connectTimeout);
       connection.setReadTimeout(readTimeout);
-      int responseCode = connection.getResponseCode();
+      final int responseCode = connection.getResponseCode();
       byte[] bytes;
       try {
         if (responseCode > 205) {
           bytes = IOUtils.toByteArray(connection.getErrorStream());
-        } else {
+        }
+        else {
           bytes = IOUtils.toByteArray(connection.getInputStream());
         }
-      } catch (IOException ex){
+      }
+      catch (final IOException ex) {
         log.debug("Error receiving http data stream {}", ex.toString());
         return CMCHttpResponseData.builder()
-          .data(null)
-          .exception(ex)
-          .responseCode(responseCode)
-          .build();
+            .data(null)
+            .exception(ex)
+            .responseCode(responseCode)
+            .build();
       }
       return CMCHttpResponseData.builder()
-        .data(bytes)
-        .exception(null)
-        .responseCode(responseCode)
-        .build();
-    } catch (Exception ex) {
+          .data(bytes)
+          .exception(null)
+          .responseCode(responseCode)
+          .build();
+    }
+    catch (final Exception ex) {
       log.debug("Error setting up HTTP connection {}", ex.toString());
       return CMCHttpResponseData.builder()
-        .data(null)
-        .exception(ex)
-        .responseCode(0)
-        .build();
+          .data(null)
+          .exception(ex)
+          .responseCode(0)
+          .build();
     }
 
   }

@@ -15,20 +15,20 @@
  */
 package se.swedenconnect.ca.cmc.api.client.impl;
 
-import lombok.extern.slf4j.Slf4j;
-import org.bouncycastle.operator.OperatorCreationException;
-import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
+import org.bouncycastle.operator.OperatorCreationException;
+
+import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Implements a pre-configured CMC Client that never needs to ask the CA for its static information.
@@ -36,22 +36,23 @@ import java.security.cert.X509Certificate;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public class PreConfiguredCMCClient extends AbstractCMCClient {
 
   /**
    * This static information MUST contain:
    *
    * <ul>
-   *   <li>CA certificate (first item in ca chain list)</li>
-   *   <li>CA signing algorithm URI</li>
-   *   <li>CRL distribution point URL(s)</li>
-   *   <li>OCSP responder URL if OCSP is used</li>
+   * <li>CA certificate (first item in ca chain list)</li>
+   * <li>CA signing algorithm URI</li>
+   * <li>CRL distribution point URL(s)</li>
+   * <li>OCSP responder URL if OCSP is used</li>
    * </ul>
    *
-   * <p>Inclusion of the OCSP certificate is optional even if OCSP is used. Leaving it out just means that a request
-   * to the API for static CA information will not return information about OCSP certificate. If that is not used
-   * byt eh application using this API, the OCSP certificate can be omitted</p>
+   * <p>
+   * Inclusion of the OCSP certificate is optional even if OCSP is used. Leaving it out just means that a request to the
+   * API for static CA information will not return information about OCSP certificate. If that is not used byt eh
+   * application using this API, the OCSP certificate can be omitted
+   * </p>
    */
   private final StaticCAInformation staticCaInformation;
 
@@ -59,8 +60,7 @@ public class PreConfiguredCMCClient extends AbstractCMCClient {
    * Constructor for the CMC Client
    *
    * @param cmcRequestUrl URL where CMC requests are sent to the remote CA
-   * @param cmcSigningKey CMC client signing key
-   * @param cmcSigningCert CMC client signing certificate
+   * @param cmcClientCredential the private key and certificate for the CMC client
    * @param algorithm CMC signing algorithm
    * @param cmcResponseCert signing certificate of the remote CA CMC responder
    * @param staticCaInformation Static information about the issuing CA
@@ -69,10 +69,12 @@ public class PreConfiguredCMCClient extends AbstractCMCClient {
    * @throws OperatorCreationException error setting up CMC client
    * @throws CertificateEncodingException error parsing provided certificates
    */
-  public PreConfiguredCMCClient(String cmcRequestUrl, PrivateKey cmcSigningKey,
-    X509Certificate cmcSigningCert, String algorithm, X509Certificate cmcResponseCert, StaticCAInformation staticCaInformation)
-    throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
-    super(cmcRequestUrl, cmcSigningKey, cmcSigningCert, algorithm, cmcResponseCert, getX509Cert(staticCaInformation.getCertificateChain().get(0)));
+  public PreConfiguredCMCClient(final String cmcRequestUrl, final PkiCredential cmcClientCredential,
+      final String algorithm, final X509Certificate cmcResponseCert,
+      final StaticCAInformation staticCaInformation)
+      throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
+    super(cmcRequestUrl, cmcClientCredential, algorithm, cmcResponseCert,
+        getX509Cert(staticCaInformation.getCertificateChain().get(0)));
     this.staticCaInformation = staticCaInformation;
   }
 
@@ -83,9 +85,9 @@ public class PreConfiguredCMCClient extends AbstractCMCClient {
    * @return {@link X509Certificate}
    * @throws CertificateEncodingException on errors parsing the certificate
    */
-  private static X509Certificate getX509Cert(byte[] certBytes) throws CertificateEncodingException{
+  private static X509Certificate getX509Cert(final byte[] certBytes) throws CertificateEncodingException {
     try (InputStream inStream = new ByteArrayInputStream(certBytes)) {
-      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+      final CertificateFactory cf = CertificateFactory.getInstance("X.509");
       return (X509Certificate) cf.generateCertificate(inStream);
     }
     catch (IOException | CertificateException e) {
@@ -93,8 +95,9 @@ public class PreConfiguredCMCClient extends AbstractCMCClient {
     }
   }
 
-  @Override public StaticCAInformation getStaticCAInformation() {
-    return staticCaInformation;
+  @Override
+  public StaticCAInformation getStaticCAInformation() {
+    return this.staticCaInformation;
   }
 
 }

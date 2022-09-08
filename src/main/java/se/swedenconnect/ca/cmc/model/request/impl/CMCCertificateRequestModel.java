@@ -15,19 +15,17 @@
  */
 package se.swedenconnect.ca.cmc.model.request.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+
 import com.sun.istack.Nullable;
-import lombok.*;
-import org.bouncycastle.operator.ContentSigner;
+
+import lombok.Getter;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.List;
-
 /**
- * Model for creating a CMC Certificate request
+ * Model for creating a CMC Certificate request.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -35,8 +33,20 @@ import java.util.List;
 @Getter
 public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
 
+  /** Certificate request model. */
+  private final CertificateModel certificateModel;
+
+  /** Private key of the requested certificate used to sign PKCS#10 requests. */
+  private PrivateKey certReqPrivate;
+
+  /** Algorithm URI identifier for the algorithm used to sign the pkcs10 request. */
+  private String p10Algorithm;
+
+  /** Boolean to indicate if the requester has verified proof-of-possession of certified private key. */
+  private final boolean lraPopWitness;
+
   /**
-   * Constructor for sending a certificate request using CRMF and POP whiteness
+   * Constructor for sending a certificate request using CRMF and POP whiteness.
    *
    * @param certificateModel certificate model
    * @param profile optional profile that may be used by the recipient to determine some certificate content
@@ -48,7 +58,7 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
   }
 
   /**
-   * Constructor for sending a certificate request based on a signed PKCS#10 request
+   * Constructor for sending a certificate request based on a signed PKCS#10 request.
    *
    * @param certificateModel certificate model
    * @param profile optional profile that may be used by the recipient to determine some certificate content
@@ -56,7 +66,7 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
    * @param p10Algorithm algorithm used to sign the PKCS 10 request
    */
   public CMCCertificateRequestModel(final CertificateModel certificateModel, @Nullable final String profile,
-    final PrivateKey certReqPrivate, final String p10Algorithm) {
+      final PrivateKey certReqPrivate, final String p10Algorithm) {
     super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
     this.certificateModel = certificateModel;
     this.certReqPrivate = certReqPrivate;
@@ -64,12 +74,4 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
     this.lraPopWitness = false;
   }
 
-  /** Certificate request model */
-  private CertificateModel certificateModel;
-  /** Private key of the requested certificate used to sign PKCS#10 requests */
-  private PrivateKey certReqPrivate;
-  /** Algorithm URI identifier for the algorithm used to sign the pkcs10 request */
-  private String p10Algorithm;
-  /** Boolean to indicate if the requester has verified proof-of-possession of certified private key */
-  private boolean lraPopWitness;
 }

@@ -16,8 +16,8 @@
 package se.swedenconnect.ca.cmc.auth;
 
 /**
- * Interface for a CMC message validator that validates the signature on the CMC message as well
- * as that the originator is authorized to send this request.
+ * Interface for a CMC message validator that validates the signature on the CMC message as well as that the originator
+ * is authorized to send this request.
  *
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
@@ -25,10 +25,10 @@ package se.swedenconnect.ca.cmc.auth;
 public interface CMCValidator {
 
   /**
-   * Validates the signature on a CMC against a defined trust configuration
+   * Validates the signature on a CMC against a defined trust configuration.
    *
    * @param cmcMessage the CMC message to validate
    * @return Validation result
    */
-  CMCValidationResult validateCMC(byte[] cmcMessage);
+  CMCValidationResult validateCMC(final byte[] cmcMessage);
 }

@@ -15,16 +15,32 @@
  */
 package se.swedenconnect.ca.cmc.api.client.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.Setter;
+import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
+import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.CMCRequestFactory;
 import se.swedenconnect.ca.cmc.api.CMCResponseParser;
 import se.swedenconnect.ca.cmc.api.client.CMCClient;
@@ -48,19 +64,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import se.swedenconnect.security.credential.PkiCredential;
 
 /**
  * Abstract implementation of a CMC Client used to execute CA management operations via CMC on a remote CA
@@ -68,44 +72,58 @@ import java.util.List;
  * @author Martin Lindström (martin@idsec.se)
  * @author Stefan Santesson (stefan@idsec.se)
  */
-@Slf4j
 public abstract class AbstractCMCClient implements CMCClient {
 
   /** JSON data object mapper */
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   /** {@inheritDoc} */
-  @Setter protected int connectTimeout = 1000;
+  @Setter
+  protected int connectTimeout = 1000;
+
   /** {@inheritDoc} */
-  @Setter protected int readTimeout = 5000;
+  @Setter
+  protected int readTimeout = 5000;
+
   /** {@inheritDoc} */
-  @Setter protected int timeSkew = 60000;
+  @Setter
+  protected int timeSkew = 60000;
+
   /** {@inheritDoc} */
-  @Setter protected int maxAge = 60000;
+  @Setter
+  protected int maxAge = 60000;
+
   /** {@inheritDoc} */
-  @Setter protected int caInfoMaxAge = 600000;
+  @Setter
+  protected int caInfoMaxAge = 600000;
+
   /** {@inheritDoc} */
-  @Setter protected CMCClientHttpConnector cmcClientHttpConnector;
+  @Setter
+  protected CMCClientHttpConnector cmcClientHttpConnector;
 
   /** Cached CA information */
   protected CAInformation cachedCAInformation;
+
   /** Time when last CA information was cached */
   protected Date lastCAInfoRecache;
 
   /** CMC request factory */
   protected final CMCRequestFactory cmcRequestFactory;
+
   /** CMC response parser */
   protected final CMCResponseParser cmcResponseParser;
+
   /** CMC Request URL where CMC requests are sent */
   protected final URL cmcRequestUrl;
+
   /** CA issuer certificate */
   protected final X509Certificate caCertificate;
 
-
   /**
-   * Constructor for the CMC Client
+   * Constructor for the CMC Client.
    *
    * @param cmcRequestUrl URL where CMC requests are sent to the remote CA
+   * @param cmcClientCredential the private key and certificate for the CMC client
    * @param cmcSigningKey CMC client signing key
    * @param cmcSigningCert CMC client signing certificate
    * @param algorithm CMC signing algorithm
@@ -116,14 +134,22 @@ public abstract class AbstractCMCClient implements CMCClient {
    * @throws OperatorCreationException error setting up CMC client
    * @throws CertificateEncodingException error parsing provided certificates
    */
-  public AbstractCMCClient(String cmcRequestUrl, PrivateKey cmcSigningKey, X509Certificate cmcSigningCert, String algorithm,
-    X509Certificate cmcResponseCert, X509Certificate caCertificate)
-    throws MalformedURLException, NoSuchAlgorithmException, OperatorCreationException, CertificateEncodingException {
+  public AbstractCMCClient(final String cmcRequestUrl, final PkiCredential cmcClientCredential,
+      final String algorithm, final X509Certificate cmcResponseCert, final X509Certificate caCertificate)
+      throws MalformedURLException, OperatorCreationException, NoSuchAlgorithmException, CertificateEncodingException {
+
+    if (Objects.requireNonNull(cmcClientCredential, "cmcClientCredential must not be null").getCertificate() == null) {
+      throw new IllegalArgumentException("Invalid CMC client credential - missing certificate");
+    }
+
     this.cmcRequestUrl = new URL(cmcRequestUrl);
-    ContentSigner contentSigner = new JcaContentSignerBuilder(CAAlgorithmRegistry.getSigAlgoName(algorithm)).build(cmcSigningKey);
-    this.cmcRequestFactory = new CMCRequestFactory(List.of(cmcSigningCert), contentSigner);
+    final ContentSigner contentSigner =
+        new JcaContentSignerBuilder(CAAlgorithmRegistry.getSigAlgoName(algorithm))
+            .build(cmcClientCredential.getPrivateKey());
+    this.cmcRequestFactory = new CMCRequestFactory(List.of(cmcClientCredential.getCertificate()), contentSigner);
     this.caCertificate = caCertificate;
-    this.cmcResponseParser = new CMCResponseParser(new DefaultCMCValidator(cmcResponseCert), caCertificate.getPublicKey());
+    this.cmcResponseParser =
+        new CMCResponseParser(new DefaultCMCValidator(cmcResponseCert), caCertificate.getPublicKey());
     this.cmcClientHttpConnector = new CMCClientHttpConnectorImpl();
   }
 
@@ -131,14 +157,15 @@ public abstract class AbstractCMCClient implements CMCClient {
    * Request a list of all certificate serial numbers in the current CA repository
    *
    * @return CMC response with certificate serial numbers or appropriate status information
-   * @throws IOException error processing the request or communicating with the remote CA
+   * @throws CMCException error processing the request or communicating with the remote CA
    */
-  @Override public CMCResponse getAllCertSerialNumbers() throws IOException {
-    final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
-      .adminRequestType(AdminRequestType.allCertSerials)
-      .build()));
+  @Override
+  public CMCResponse getAllCertSerialNumbers() throws CMCException {
+    final CMCRequest cmcRequest = this.cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
+        .adminRequestType(AdminRequestType.allCertSerials)
+        .build()));
 
-    return getCMCResponse(cmcRequest);
+    return this.getCMCResponse(cmcRequest);
   }
 
   /**
@@ -146,24 +173,28 @@ public abstract class AbstractCMCClient implements CMCClient {
    *
    * @param certificateModel certificate model describing the content of the certificate to be issued
    * @return CMC response with issued certificate or appropriate status information
-   * @throws IOException error processing the request or communicating with the remote CA
+   * @throws CMCException error processing the request or communicating with the remote CA
    */
-  @Override public CMCResponse issueCertificate(CertificateModel certificateModel) throws IOException {
-    final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, "crmf"));
-    return getCMCResponse(cmcRequest);
+  @Override
+  public CMCResponse issueCertificate(final CertificateModel certificateModel) throws CMCException {
+    final CMCRequest cmcRequest =
+        this.cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, "crmf"));
+    return this.getCMCResponse(cmcRequest);
   }
 
   /**
-   * Send a request to retrieve a particular certificate
+   * Send a request to retrieve a particular certificate.
    *
    * @param serialNumber serial number of the certificate to retrieve
    * @return CMC response with the retrieved certificate or appropriate status information
-   * @throws IOException error processing the request or communicating with the remote CA
+   * @throws CMCException error processing the request or communicating with the remote CA
    */
-  @Override public CMCResponse getIssuedCertificate(BigInteger serialNumber) throws IOException {
-    X509CertificateHolder caIssuerCert = getCertificateHolder(caCertificate);
-    final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCGetCertRequestModel(serialNumber, caIssuerCert.getSubject()));
-    return getCMCResponse(cmcRequest);
+  @Override
+  public CMCResponse getIssuedCertificate(final BigInteger serialNumber) throws CMCException {
+    final X509CertificateHolder caIssuerCert = this.getCertificateHolder(this.caCertificate);
+    final CMCRequest cmcRequest =
+        this.cmcRequestFactory.getCMCRequest(new CMCGetCertRequestModel(serialNumber, caIssuerCert.getSubject()));
+    return this.getCMCResponse(cmcRequest);
   }
 
   /**
@@ -173,23 +204,24 @@ public abstract class AbstractCMCClient implements CMCClient {
    * @param reason the reason code for the revocation
    * @param revocationDate the date of revocation
    * @return CMC response with appropriate status information
-   * @throws IOException error processing the request or communicating with the remote CA
+   * @throws CMCException error processing the request or communicating with the remote CA
    */
-  @Override public CMCResponse revokeCertificate(BigInteger serialNumber, int reason, Date revocationDate) throws IOException {
-    X509CertificateHolder caIssuerCert = getCertificateHolder(caCertificate);
-    final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCRevokeRequestModel(
-      serialNumber,
-      reason,
-      revocationDate,
-      caIssuerCert.getSubject()
-    ));
-    return getCMCResponse(cmcRequest);
+  @Override
+  public CMCResponse revokeCertificate(final BigInteger serialNumber, final int reason, final Date revocationDate)
+      throws CMCException {
+    final X509CertificateHolder caIssuerCert = this.getCertificateHolder(this.caCertificate);
+    final CMCRequest cmcRequest = this.cmcRequestFactory.getCMCRequest(new CMCRevokeRequestModel(
+        serialNumber,
+        reason,
+        revocationDate,
+        caIssuerCert.getSubject()));
+    return this.getCMCResponse(cmcRequest);
   }
 
   /**
-   * Send a request to list a range of certificates in the CA repository. This function divide certificates into
-   * pages with a fixed amount of certificates in each page. This function allows to retrieve a page of certificates
-   * and to specify the conditions for constructing this page.
+   * Send a request to list a range of certificates in the CA repository. This function divide certificates into pages
+   * with a fixed amount of certificates in each page. This function allows to retrieve a page of certificates and to
+   * specify the conditions for constructing this page.
    *
    * @param pageSize the number of certificates in each page
    * @param pageIndex the index of the page of the requested size to return
@@ -199,38 +231,46 @@ public abstract class AbstractCMCClient implements CMCClient {
    * @return the identified page of certificates
    * @throws IOException on error processing the request
    */
-  @Override public CMCResponse listCertificates(int pageSize, int pageIndex, SortBy sortBy, boolean notRevoked,
-    boolean descending) throws IOException {
-    final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
-      .adminRequestType(AdminRequestType.listCerts)
-      .data(OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
-        .pageSize(pageSize)
-        .pageIndex(pageIndex)
-        .sortBy(sortBy)
-        .notRevoked(notRevoked)
-          .descending(descending)
-        .build()))
-      .build()));
-    return getCMCResponse(cmcRequest);
+  @Override
+  public CMCResponse listCertificates(final int pageSize, final int pageIndex, final SortBy sortBy,
+      final boolean notRevoked, final boolean descending) throws CMCException {
+    try {
+      final CMCRequest cmcRequest = this.cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
+          .adminRequestType(AdminRequestType.listCerts)
+          .data(OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
+              .pageSize(pageSize)
+              .pageIndex(pageIndex)
+              .sortBy(sortBy)
+              .notRevoked(notRevoked)
+              .descending(descending)
+              .build()))
+          .build()));
+      return this.getCMCResponse(cmcRequest);
+    }
+    catch (final JsonProcessingException e) {
+      throw new CMCMessageException("Failed to write certificates in JSON", e);
+    }
   }
 
   /**
-   * Return a certificate model builder prepared for creating certificate models for certificate requests to this CA service via CMC
+   * Return a certificate model builder prepared for creating certificate models for certificate requests to this CA
+   * service via CMC
    *
    * @param subjectPublicKey the public key of the subject
-   * @param subject          subject name data
-   * @param includeCrlDPs    true to include CRL distribution point URLs in the issued certificate
-   * @param includeOcspURL   true to include OCSP URL (if present) in the issued certificate
+   * @param subject subject name data
+   * @param includeCrlDPs true to include CRL distribution point URLs in the issued certificate
+   * @param includeOcspURL true to include OCSP URL (if present) in the issued certificate
    * @return certificate model builder
    * @throws IOException errors obtaining the certificate model builder
    */
-  @Override public CMCCertificateModelBuilder getCertificateModelBuilder(PublicKey subjectPublicKey,
-    CertNameModel<?> subject,
-    boolean includeCrlDPs, boolean includeOcspURL) throws IOException {
-    final StaticCAInformation caInformation = getStaticCAInformation();
-    X509CertificateHolder caIssuerCert = getCertificateHolder(caCertificate);
-    CMCCertificateModelBuilder certModelBuilder = CMCCertificateModelBuilder.getInstance(subjectPublicKey, caIssuerCert,
-      caInformation.getCaAlgorithm());
+  @Override
+  public CMCCertificateModelBuilder getCertificateModelBuilder(final PublicKey subjectPublicKey,
+      final CertNameModel<?> subject, final boolean includeCrlDPs, final boolean includeOcspURL) throws CMCException {
+    final StaticCAInformation caInformation = this.getStaticCAInformation();
+    final X509CertificateHolder caIssuerCert = this.getCertificateHolder(this.caCertificate);
+    final CMCCertificateModelBuilder certModelBuilder =
+        CMCCertificateModelBuilder.getInstance(subjectPublicKey, caIssuerCert,
+            caInformation.getCaAlgorithm());
 
     if (includeCrlDPs) {
       certModelBuilder.crlDistributionPoints(caInformation.getCrlDpURLs());
@@ -246,85 +286,84 @@ public abstract class AbstractCMCClient implements CMCClient {
    * Send a CMC request to obtain information about the remote CA
    *
    * @param forceRecache set to true to force this request to be sent and processed by the remote CA and set to false to
-   *                     allow the API to return cached information if it is reasonably fresh
+   *          allow the API to return cached information if it is reasonably fresh
    * @return CA information about the remote CA
-   * @throws IOException on error processing the request
+   * @throws CMCException on error processing the request
    */
-  @Override public CAInformation getCAInformation(boolean forceRecache) throws IOException {
+  @Override
+  public CAInformation getCAInformation(final boolean forceRecache) throws CMCException {
     if (!forceRecache) {
-      if (this.cachedCAInformation != null && lastCAInfoRecache != null) {
-        Date notBefore = new Date(System.currentTimeMillis() - caInfoMaxAge);
-        if (lastCAInfoRecache.after(notBefore)) {
+      if (this.cachedCAInformation != null && this.lastCAInfoRecache != null) {
+        final Date notBefore = new Date(System.currentTimeMillis() - this.caInfoMaxAge);
+        if (this.lastCAInfoRecache.after(notBefore)) {
           // Re-cache is not forced and current cache is not too old. Use it.
-          return cachedCAInformation;
+          return this.cachedCAInformation;
         }
       }
     }
     // Re-cache is required
-    cachedCAInformation = CMCResponseExtract.extractCAInformation(getCaInfo());
-    lastCAInfoRecache = new Date();
-    return cachedCAInformation;
+    this.cachedCAInformation = CMCResponseExtract.extractCAInformation(this.getCaInfo());
+    this.lastCAInfoRecache = new Date();
+    return this.cachedCAInformation;
   }
-
 
   /**
    * Request information about the remote CA
    *
    * @return CMC response with CA information or appropriate status information
-   * @throws IOException error processing the request or communicating with the remote CA
+   * @throws CMCException error processing the request or communicating with the remote CA
    */
-  protected CMCResponse getCaInfo() throws IOException {
+  protected CMCResponse getCaInfo() throws CMCException {
 
-    final CMCRequest cmcRequest = cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
-      .adminRequestType(AdminRequestType.caInfo)
-      .build()));
+    final CMCRequest cmcRequest = this.cmcRequestFactory.getCMCRequest(new CMCAdminRequestModel(AdminCMCData.builder()
+        .adminRequestType(AdminRequestType.caInfo)
+        .build()));
 
-    return getCMCResponse(cmcRequest);
+    return this.getCMCResponse(cmcRequest);
   }
 
   /**
    * Send a CMC request and obtain the corresponding CMC response
+   *
    * @param cmcRequest CMC request
    * @return CMC response
-   * @throws IOException error sending or processing CMC request or response
+   * @throws CMCException error sending or processing CMC request or response
    */
-  protected CMCResponse getCMCResponse(CMCRequest cmcRequest) throws IOException {
+  protected CMCResponse getCMCResponse(final CMCRequest cmcRequest) throws CMCException {
 
-    CMCHttpResponseData httpResponseData = cmcClientHttpConnector.sendCmcRequest(cmcRequest.getCmcRequestBytes(), cmcRequestUrl, connectTimeout, readTimeout);
-    if (httpResponseData.getResponseCode() > 205 || httpResponseData.getException() != null){
-      throw new IOException("Http connection to CA failed");
+    final CMCHttpResponseData httpResponseData =
+        this.cmcClientHttpConnector.sendCmcRequest(cmcRequest.getCmcRequestBytes(),
+            this.cmcRequestUrl,
+            this.connectTimeout, this.readTimeout);
+    if (httpResponseData.getResponseCode() > 205 || httpResponseData.getException() != null) {
+      throw new CMCClientConnectionException("Http connection to CA failed");
     }
-    byte[] cmcResponseBytes = httpResponseData.getData();
-    Date notBefore = new Date(System.currentTimeMillis() - maxAge);
-    Date notAfter = new Date(System.currentTimeMillis() + timeSkew);
-    final Date signingTime;
-    try {
-      signingTime = CMCUtils.getSigningTime(cmcResponseBytes);
-      if (signingTime.before(notBefore)) {
-        throw new IOException("CMC Response is to old");
-      }
-      if (signingTime.after(notAfter)) {
-        throw new IOException("CMC Response is predated - possible time skew problem");
-      }
+    final byte[] cmcResponseBytes = httpResponseData.getData();
+    final Date notBefore = new Date(System.currentTimeMillis() - this.maxAge);
+    final Date notAfter = new Date(System.currentTimeMillis() + this.timeSkew);
+    final Date signingTime = CMCUtils.getSigningTime(cmcResponseBytes);
+    if (signingTime.before(notBefore)) {
+      throw new CMCMessageException("CMC Response is to old");
     }
-    catch (CMSException e) {
-      throw new IOException("Error parsing signing time in CMC Response", e);
+    if (signingTime.after(notAfter)) {
+      throw new CMCMessageException("CMC Response is predated - possible time skew problem");
     }
 
-    CMCResponse cmcResponse = cmcResponseParser.parseCMCresponse(cmcResponseBytes, cmcRequest.getCmcRequestType());
+    final CMCResponse cmcResponse =
+        this.cmcResponseParser.parseCMCresponse(cmcResponseBytes, cmcRequest.getCmcRequestType());
     if (!Arrays.equals(cmcRequest.getNonce(), cmcResponse.getNonce())) {
-      throw new IOException("CMC response and request nonce mismatch");
+      throw new CMCMessageException("CMC response and request nonce mismatch");
     }
     return cmcResponse;
 
   }
 
-  private X509CertificateHolder getCertificateHolder(X509Certificate caCertificate) throws IOException {
+  private X509CertificateHolder getCertificateHolder(final X509Certificate caCertificate) throws CMCMessageException {
     try {
       return new JcaX509CertificateHolder(caCertificate);
     }
-    catch (CertificateEncodingException e) {
-      throw new IOException(e);
+    catch (final CertificateEncodingException e) {
+      throw new CMCMessageException("Failed to get encoding of CA certificate");
     }
   }
 
