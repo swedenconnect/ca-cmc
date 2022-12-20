@@ -72,7 +72,7 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
     CRLIssuerModel crlIssuerModel = getCrlIssuerModel(getCaRepository().getCRLRevocationDataProvider(), algorithm);
     this.crlDistributionPoints = new ArrayList<>();
     if (crlIssuerModel != null) {
-      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, issuerCredential);
+      this.crlIssuer = new DefaultCRLIssuer(crlIssuerModel, caRepository.getCRLRevocationDataProvider(), issuerCredential);
       this.crlDistributionPoints = Arrays.asList(crlIssuerModel.getDistributionPointUrl());
       publishNewCrl();
     }
@@ -82,7 +82,7 @@ public class TestCAService extends AbstractCAService<DefaultCertificateModelBuil
       throws CertificateRevocationException {
     try {
       return new CRLIssuerModel(getCaCertificate(), algorithm,
-          Duration.ofHours(2), crlRevocationDataProvider, TestCAHolder.getFileUrl(crlFile));
+          Duration.ofHours(2), TestCAHolder.getFileUrl(crlFile));
     }
     catch (Exception e) {
       throw new CertificateRevocationException(e);

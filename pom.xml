@@ -5,7 +5,7 @@
 
   <groupId>se.swedenconnect.ca</groupId>
   <artifactId>cmc</artifactId>
-  <version>1.3.1</version>
+  <version>1.3.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>CA CMC API</name>
@@ -16,7 +16,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <ca.engine.version>1.2.2</ca.engine.version>
+    <ca.engine.version>1.3.0-SNAPSHOT</ca.engine.version>
     <slf4j.version>1.7.36</slf4j.version>
   </properties>
 
@@ -79,7 +79,7 @@
       <dependency>
         <groupId>se.idsec.signservice.commons</groupId>
         <artifactId>signservice-bom</artifactId>
-        <version>1.2.2</version>
+        <version>1.2.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -185,7 +185,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>enforce</id>
