@@ -37,8 +37,8 @@ import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
+import se.swedenconnect.ca.engine.revocation.crl.CRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
-import se.swedenconnect.ca.engine.revocation.crl.CurrentCRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
 /**
@@ -205,30 +205,36 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
 
-  @SneakyThrows
   @Override
   public X509CRLHolder getCurrentCrl() {
-    return new X509CRLHolder(new FileInputStream(crlFile));
+    try {
+      return new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      throw new RuntimeException("No current CRL is available");
+    }
   }
 
-  @Override public CurrentCRLMetadata getCurrentCRLMetadata() {
-    X509CRLHolder currentCrl = getCurrentCrl();
-    return new CurrentCRLMetadata() {
-      @Override public BigInteger getCrlNumber() {
-        return crlNumber;
-      }
+  @Override public CRLMetadata getCurrentCRLMetadata() {
+    final X509CRLHolder currentCrl;
+    try {
+      currentCrl = new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      // No CRL is available. Return empty metadata to allow initial CRL creation;
+      return CRLMetadata.builder()
+        .crlNumber(BigInteger.ZERO)
+        .issueTime(Instant.ofEpochMilli(0L))
+        .nextUpdate(Instant.ofEpochMilli(0L))
+        .revokedCertCount(0)
+        .build();
+    }
 
-      @Override public Instant getIssueTime() {
-        return currentCrl.getThisUpdate().toInstant();
-      }
-
-      @Override public Instant getNextUpdate() {
-        return currentCrl.getNextUpdate().toInstant();
-      }
-
-      @Override public int getRevokedCertCount() {
-        return currentCrl.getRevokedCertificates().size();
-      }
-    };
+    return CRLMetadata.builder()
+      .crlNumber(crlNumber)
+      .issueTime(currentCrl.getThisUpdate().toInstant())
+      .nextUpdate(currentCrl.getNextUpdate().toInstant())
+      .revokedCertCount(currentCrl.getRevokedCertificates().size())
+      .build();
   }
 }
