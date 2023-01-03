@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Agency for Digital Government (DIGG)
+ * Copyright 2023 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -37,6 +37,7 @@ import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.ca.repository.impl.SerializableCertificateRecord;
 import se.swedenconnect.ca.engine.revocation.CertificateRevocationException;
+import se.swedenconnect.ca.engine.revocation.crl.CRLMetadata;
 import se.swedenconnect.ca.engine.revocation.crl.CRLRevocationDataProvider;
 import se.swedenconnect.ca.engine.revocation.crl.RevokedCertificate;
 
@@ -61,16 +62,16 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   @Override
   public List<BigInteger> getAllCertificates() {
     return issuedCerts.stream()
-        .map(certificateRecord -> certificateRecord.getSerialNumber())
-        .collect(Collectors.toList());
+      .map(CertificateRecord::getSerialNumber)
+      .collect(Collectors.toList());
   }
 
   @Override
   public CertificateRecord getCertificate(BigInteger bigInteger) {
-    Optional<CertificateRecord> recordOptional = issuedCerts.stream()
-        .filter(certificateRecord -> certificateRecord.getSerialNumber().equals(bigInteger))
-        .findFirst();
-    return recordOptional.isPresent() ? recordOptional.get() : null;
+    return issuedCerts.stream()
+      .filter(certificateRecord -> certificateRecord.getSerialNumber().equals(bigInteger))
+      .findFirst()
+      .orElse(null);
   }
 
   @Override
@@ -80,12 +81,12 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
       throw new IOException("This certificate already exists in the certificate repository");
     }
     issuedCerts.add(new SerializableCertificateRecord(certificate.getEncoded(), certificate.getSerialNumber(),
-        certificate.getNotBefore(), certificate.getNotAfter(), false, null, null));
+      certificate.getNotBefore(), certificate.getNotAfter(), false, null, null));
   }
 
   @Override
   public void revokeCertificate(BigInteger serialNumber, int reason, Date revocationTime)
-      throws CertificateRevocationException {
+    throws CertificateRevocationException {
     if (serialNumber == null) {
       throw new CertificateRevocationException("Null Serial number");
     }
@@ -106,12 +107,12 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   @Override
   public List<RevokedCertificate> getRevokedCertificates() {
     return issuedCerts.stream()
-        .filter(certificateRecord -> certificateRecord.isRevoked())
-        .map(certificateRecord -> new RevokedCertificate(
-            certificateRecord.getSerialNumber(),
-            certificateRecord.getRevocationTime(),
-            certificateRecord.getReason()))
-        .collect(Collectors.toList());
+      .filter(CertificateRecord::isRevoked)
+      .map(certificateRecord -> new RevokedCertificate(
+        certificateRecord.getSerialNumber(),
+        certificateRecord.getRevocationTime(),
+        certificateRecord.getReason()))
+      .collect(Collectors.toList());
   }
 
   @Override
@@ -127,22 +128,22 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     }
 
     return (int) issuedCerts.stream()
-        .filter(certificateRecord -> !certificateRecord.isRevoked())
-        .count();
+      .filter(certificateRecord -> !certificateRecord.isRevoked())
+      .count();
   }
 
   @Override
   public List<CertificateRecord> getCertificateRange(int page, int pageSize, boolean valid, SortBy sortBy,
-      boolean descending) {
+    boolean descending) {
 
     List<CertificateRecord> records = issuedCerts.stream()
-        .filter(certificateRecord -> {
-          if (valid) {
-            return !certificateRecord.isRevoked();
-          }
-          return true;
-        })
-        .collect(Collectors.toList());
+      .filter(certificateRecord -> {
+        if (valid) {
+          return !certificateRecord.isRevoked();
+        }
+        return true;
+      })
+      .collect(Collectors.toList());
 
     if (sortBy != null) {
       switch (sortBy) {
@@ -181,20 +182,20 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
   @Override
   public synchronized List<BigInteger> removeExpiredCerts(int gracePeriodSeconds) {
     List<BigInteger> removedSerialList = new ArrayList<>();
-    Date notBefore = new Date(System.currentTimeMillis() - (1000 * gracePeriodSeconds));
+    Date notBefore = new Date(System.currentTimeMillis() - (1000L * gracePeriodSeconds));
     issuedCerts = issuedCerts.stream()
-        .filter(certificateRecord -> {
-          final Date expiryDate = certificateRecord.getExpiryDate();
-          // Check if certificate expired before the current time minus grace period
-          if (expiryDate.before(notBefore)) {
-            // Yes - Remove certificate
-            removedSerialList.add(certificateRecord.getSerialNumber());
-            return false;
-          }
-          // No - keep certificate on repository
-          return true;
-        })
-        .collect(Collectors.toList());
+      .filter(certificateRecord -> {
+        final Date expiryDate = certificateRecord.getExpiryDate();
+        // Check if certificate expired before the current time minus grace period
+        if (expiryDate.before(notBefore)) {
+          // Yes - Remove certificate
+          removedSerialList.add(certificateRecord.getSerialNumber());
+          return false;
+        }
+        // No - keep certificate on repository
+        return true;
+      })
+      .collect(Collectors.toList());
     return removedSerialList;
   }
 
@@ -204,9 +205,36 @@ public class TestCARepository implements CARepository, CRLRevocationDataProvider
     FileUtils.writeByteArrayToFile(crlFile, crl.getEncoded());
   }
 
-  @SneakyThrows
   @Override
   public X509CRLHolder getCurrentCrl() {
-    return new X509CRLHolder(new FileInputStream(crlFile));
+    try {
+      return new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      throw new RuntimeException("No current CRL is available");
+    }
+  }
+
+  @Override public CRLMetadata getCurrentCRLMetadata() {
+    final X509CRLHolder currentCrl;
+    try {
+      currentCrl = new X509CRLHolder(new FileInputStream(crlFile));
+    }
+    catch (IOException e) {
+      // No CRL is available. Return empty metadata to allow initial CRL creation;
+      return CRLMetadata.builder()
+        .crlNumber(BigInteger.ZERO)
+        .issueTime(Instant.ofEpochMilli(0L))
+        .nextUpdate(Instant.ofEpochMilli(0L))
+        .revokedCertCount(0)
+        .build();
+    }
+
+    return CRLMetadata.builder()
+      .crlNumber(crlNumber)
+      .issueTime(currentCrl.getThisUpdate().toInstant())
+      .nextUpdate(currentCrl.getNextUpdate().toInstant())
+      .revokedCertCount(currentCrl.getRevokedCertificates().size())
+      .build();
   }
 }
