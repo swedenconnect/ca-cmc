@@ -36,6 +36,7 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCertificateModelBuilder;
@@ -98,6 +99,7 @@ public abstract class AbstractCMCClient implements CMCClient {
 
   /** {@inheritDoc} */
   @Setter
+  @Getter
   protected CMCClientHttpConnector cmcClientHttpConnector;
 
   /** Cached CA information */

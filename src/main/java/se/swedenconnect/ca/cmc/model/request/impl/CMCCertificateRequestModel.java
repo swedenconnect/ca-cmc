@@ -18,8 +18,6 @@ package se.swedenconnect.ca.cmc.model.request.impl;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 
-import com.sun.istack.Nullable;
-
 import lombok.Getter;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
@@ -51,7 +49,7 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
    * @param certificateModel certificate model
    * @param profile optional profile that may be used by the recipient to determine some certificate content
    */
-  public CMCCertificateRequestModel(final CertificateModel certificateModel, @Nullable final String profile) {
+  public CMCCertificateRequestModel(final CertificateModel certificateModel, final String profile) {
     super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
     this.certificateModel = certificateModel;
     this.lraPopWitness = true;
@@ -65,7 +63,7 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
    * @param certReqPrivate private key of the certificate holder
    * @param p10Algorithm algorithm used to sign the PKCS 10 request
    */
-  public CMCCertificateRequestModel(final CertificateModel certificateModel, @Nullable final String profile,
+  public CMCCertificateRequestModel(final CertificateModel certificateModel, final String profile,
       final PrivateKey certReqPrivate, final String p10Algorithm) {
     super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
     this.certificateModel = certificateModel;

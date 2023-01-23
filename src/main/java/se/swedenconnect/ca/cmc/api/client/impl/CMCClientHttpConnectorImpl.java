@@ -18,11 +18,12 @@ package se.swedenconnect.ca.cmc.api.client.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
 import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
@@ -34,8 +35,18 @@ import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
  * @author Stefan Santesson (stefan@idsec.se)
  */
 @Slf4j
-@NoArgsConstructor
 public class CMCClientHttpConnectorImpl implements CMCClientHttpConnector {
+
+  /** Setting http proxy for CMC client connections */
+  @Setter
+  private Proxy proxy;
+
+  /**
+   * Constructor for CMC client http connector
+   */
+  public CMCClientHttpConnectorImpl() {
+    this.proxy = Proxy.NO_PROXY;
+  }
 
   private static final String CMC_MIME_TYPE = "application/pkcs7-mime";
 
@@ -44,7 +55,7 @@ public class CMCClientHttpConnectorImpl implements CMCClientHttpConnector {
   public CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl,
       final int connectTimeout, final int readTimeout) {
     try {
-      final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
+      final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection(proxy);
       connection.setRequestMethod("POST");
       connection.setDoOutput(true);
       connection.setRequestProperty("Content-Type", CMC_MIME_TYPE);
