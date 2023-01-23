@@ -23,7 +23,6 @@ import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
