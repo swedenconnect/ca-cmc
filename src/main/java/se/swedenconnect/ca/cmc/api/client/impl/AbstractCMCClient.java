@@ -98,7 +98,8 @@ public abstract class AbstractCMCClient implements CMCClient {
   protected int caInfoMaxAge = 600000;
 
   /** {@inheritDoc} */
-  @Setter @Getter
+  @Setter
+  @Getter
   protected CMCClientHttpConnector cmcClientHttpConnector;
 
   /** Cached CA information */

@@ -194,4 +194,11 @@ public interface CMCClient {
    */
   void setCmcClientHttpConnector(final CMCClientHttpConnector cmcClientHttpConnector);
 
+  /**
+   * Get the {@link CMCClientHttpConnector}.
+   *
+   * @return {@link CMCClientHttpConnector}
+   */
+   CMCClientHttpConnector getCmcClientHttpConnector();
+
 }
