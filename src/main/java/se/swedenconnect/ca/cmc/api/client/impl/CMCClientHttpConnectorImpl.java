@@ -49,7 +49,7 @@ public class CMCClientHttpConnectorImpl implements CMCClientHttpConnector {
   public CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl,
       final int connectTimeout, final int readTimeout) {
     try {
-      final HttpURLConnection connection = proxy != null
+      final HttpURLConnection connection = proxy == null
         ? (HttpURLConnection) requestUrl.openConnection()
         : (HttpURLConnection) requestUrl.openConnection(proxy);
       connection.setRequestMethod("POST");
