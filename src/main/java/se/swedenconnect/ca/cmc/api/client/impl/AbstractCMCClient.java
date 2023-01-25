@@ -149,7 +149,7 @@ public abstract class AbstractCMCClient implements CMCClient {
     this.caCertificate = caCertificate;
     this.cmcResponseParser =
         new CMCResponseParser(new DefaultCMCValidator(cmcResponseCert), caCertificate.getPublicKey());
-    this.cmcClientHttpConnector = new CMCClientHttpConnectorImpl();
+    this.cmcClientHttpConnector = new ProxyCMCClientHttpConnector(null);
   }
 
   /**
