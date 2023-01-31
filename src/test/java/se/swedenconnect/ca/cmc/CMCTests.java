@@ -597,9 +597,9 @@ public class CMCTests {
   private CMCRequestModel getCMCRequest(CertificateModel certificateModel, KeyPair kp, boolean crmf) {
 
     return crmf
-      ? new CMCCertificateRequestModel(certificateModel, "profileCrmf")
-      : new CMCCertificateRequestModel(certificateModel, "profilePkcs10",
-      kp.getPrivate(), CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256);
+      ? new CMCCertificateRequestModel(certificateModel, "profileCrmf".getBytes(StandardCharsets.UTF_8))
+      : new CMCCertificateRequestModel(certificateModel, kp.getPrivate(),
+      CAAlgorithmRegistry.ALGO_ID_SIGNATURE_ECDSA_SHA256, "profilePkcs10".getBytes(StandardCharsets.UTF_8));
   }
 
 }

@@ -17,6 +17,7 @@
 package se.swedenconnect.ca.cmc.api.client;
 
 import java.math.BigInteger;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Date;
 
@@ -78,6 +79,21 @@ public interface CMCClient {
    *           error processing the request or communicating with the remote CA
    */
   CMCResponse issueCertificate(final CertificateModel certificateModel) throws CMCException;
+
+  /**
+   * Issue a certificate allowing a PKCS#10 request to be requested. A PKCS#10 request format will be used if
+   * a private key is provided. If not, the CRMF request format will be used.
+   *
+   * @param certificateModel
+   *          certificate model describing the content of the certificate to be issued
+   * @param certReqPrivate private key associated with the public key in the certificate request
+   * @param p10Algorithm the algorithm used to sign the pkcs#10 request (MUST be provided if a private key is provided)
+   * @param regInfo optional regInfo data to be included in the CMC request as additional data to the CA
+   * @return CMC response with issued certificate or appropriate status information
+   * @throws CMCException
+   *           error processing the request or communicating with the remote CA
+   */
+  CMCResponse issueCertificate(final CertificateModel certificateModel, PrivateKey certReqPrivate, String p10Algorithm, byte[] regInfo) throws CMCException;
 
   /**
    * Retrieve a particular certificate

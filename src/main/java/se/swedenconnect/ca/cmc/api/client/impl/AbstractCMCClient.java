@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -167,19 +168,38 @@ public abstract class AbstractCMCClient implements CMCClient {
     return this.getCMCResponse(cmcRequest);
   }
 
-  /**
-   * Send a request to issue a certificate
-   *
-   * @param certificateModel certificate model describing the content of the certificate to be issued
-   * @return CMC response with issued certificate or appropriate status information
-   * @throws CMCException error processing the request or communicating with the remote CA
-   */
+  /** {@inheritDoc} */
   @Override
   public CMCResponse issueCertificate(final CertificateModel certificateModel) throws CMCException {
     final CMCRequest cmcRequest =
-        this.cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, "crmf"));
+        this.cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, null));
     return this.getCMCResponse(cmcRequest);
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public CMCResponse issueCertificate(final CertificateModel certificateModel, PrivateKey certReqPrivate, String p10Algorithm, byte[] regInfo) throws CMCException {
+    final CMCRequest cmcRequest;
+    if (certReqPrivate == null) {
+      cmcRequest = getIssueCertCRMFRequest(certificateModel, regInfo);
+    } else {
+      cmcRequest = getIssueCertPKCS10Request(certificateModel, certReqPrivate, p10Algorithm, regInfo);
+    }
+    return this.getCMCResponse(cmcRequest);
+  }
+
+  private CMCRequest getIssueCertCRMFRequest(final CertificateModel certificateModel, byte[] regInfo) throws CMCException {
+    Objects.requireNonNull(certificateModel, "Certificate model must not be null");
+    return this.cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, regInfo));
+  }
+
+  private CMCRequest getIssueCertPKCS10Request(final CertificateModel certificateModel, PrivateKey certReqPrivate, String p10Algorithm, byte[] regInfo) throws CMCException {
+    Objects.requireNonNull(certificateModel, "Certificate model must not be null");
+    Objects.requireNonNull(certReqPrivate , "Certificate private key must not be null");
+    Objects.requireNonNull(p10Algorithm, "PKCS10 signing algorithm must not be null");
+    return this.cmcRequestFactory.getCMCRequest(new CMCCertificateRequestModel(certificateModel, certReqPrivate , p10Algorithm, regInfo));
+  }
+
 
   /**
    * Send a request to retrieve a particular certificate.
