@@ -38,11 +38,4 @@ public interface CMCClientHttpConnector {
   CMCHttpResponseData sendCmcRequest(final byte[] cmcRequestBytes, final URL requestUrl,
       final int connectTimeout, final int readTimeout);
 
-  /**
-   * Set a proxy used when opening an HTTP connection
-   *
-   * @param proxy http proxy
-   */
-  void setProxy(Proxy proxy);
-
 }

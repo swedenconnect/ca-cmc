@@ -47,10 +47,10 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
    * Constructor for sending a certificate request using CRMF and POP whiteness.
    *
    * @param certificateModel certificate model
-   * @param profile optional profile that may be used by the recipient to determine some certificate content
+   * @param regInfo optional additional data that may be used by the recipient to determine some certificate content
    */
-  public CMCCertificateRequestModel(final CertificateModel certificateModel, final String profile) {
-    super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
+  public CMCCertificateRequestModel(final CertificateModel certificateModel, final byte[] regInfo) {
+    super(CMCRequestType.issueCert, regInfo);
     this.certificateModel = certificateModel;
     this.lraPopWitness = true;
   }
@@ -59,13 +59,12 @@ public class CMCCertificateRequestModel extends AbstractCMCRequestModel {
    * Constructor for sending a certificate request based on a signed PKCS#10 request.
    *
    * @param certificateModel certificate model
-   * @param profile optional profile that may be used by the recipient to determine some certificate content
    * @param certReqPrivate private key of the certificate holder
    * @param p10Algorithm algorithm used to sign the PKCS 10 request
+   * @param regInfo optional additional data that may be used by the recipient to determine some certificate content
    */
-  public CMCCertificateRequestModel(final CertificateModel certificateModel, final String profile,
-      final PrivateKey certReqPrivate, final String p10Algorithm) {
-    super(CMCRequestType.issueCert, profile != null ? profile.getBytes(StandardCharsets.UTF_8) : null);
+  public CMCCertificateRequestModel(final CertificateModel certificateModel, final PrivateKey certReqPrivate, final String p10Algorithm, byte[] regInfo) {
+    super(CMCRequestType.issueCert, regInfo);
     this.certificateModel = certificateModel;
     this.certReqPrivate = certReqPrivate;
     this.p10Algorithm = p10Algorithm;
