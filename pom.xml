@@ -132,7 +132,7 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.15</version>
+      <version>1.17.1</version>
     </dependency>
 
     <!-- Scope TEST -->
@@ -204,7 +204,7 @@
             <id>enforce</id>
             <configuration>
               <rules>
-                <dependencyConvergence />
+                <dependencyConvergence/>
               </rules>
             </configuration>
             <goals>
@@ -278,7 +278,7 @@
                 <id>enforce</id>
                 <configuration>
                   <rules>
-                    <dependencyConvergence />
+                    <dependencyConvergence/>
                   </rules>
                 </configuration>
                 <goals>
