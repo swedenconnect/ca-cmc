@@ -358,7 +358,9 @@ public abstract class AbstractCMCClient implements CMCClient {
       throw new CMCClientConnectionException("Http connection to CA failed");
     }
     final byte[] cmcResponseBytes = httpResponseData.getData();
-    // TODO Check and properly log if valid CMC data is not available (Or else it woll be noted below as failure to parse time data)
+    if (cmcResponseBytes == null) {
+      throw new CMCMessageException("Failed to retrieve CMC response data");
+    }
     final Date notBefore = new Date(System.currentTimeMillis() - this.maxAge);
     final Date notAfter = new Date(System.currentTimeMillis() + this.timeSkew);
     final Date signingTime = CMCUtils.getSigningTime(cmcResponseBytes);
