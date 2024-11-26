@@ -78,29 +78,29 @@ public abstract class AbstractCMCClient implements CMCClient {
   /** JSON data object mapper */
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  /** {@inheritDoc} */
   @Setter
+  /** HTTP connect timeout */
   protected int connectTimeout = 1000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** HTTP read timeout */
   protected int readTimeout = 5000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** Time skew */
   protected int timeSkew = 60000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** Max message age */
   protected int maxAge = 60000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** CA information max message age */
   protected int caInfoMaxAge = 600000;
 
-  /** {@inheritDoc} */
   @Setter
   @Getter
+  /* Connector for CMC requests */
   protected CMCClientHttpConnector cmcClientHttpConnector;
 
   /** Cached CA information */
