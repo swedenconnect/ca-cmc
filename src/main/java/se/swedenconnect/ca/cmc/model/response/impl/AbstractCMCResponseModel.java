@@ -33,48 +33,33 @@ import se.swedenconnect.ca.cmc.model.response.CMCResponseModel;
  */
 public class AbstractCMCResponseModel implements CMCResponseModel {
 
-  /**
-   * Nonce
-   *
-   * @param nonce nonce
-   * @return nonce value
-   */
+  /** Nonce. */
   @Getter
   @Setter
   protected byte[] nonce;
 
   /**
-   * Response info bytes used to communicate custom result data in the response
-   *
-   * @param responseInfo response info
-   * @return response info bytes
+   * Response info bytes used to communicate custom result data in the response.
    */
   @Getter
   @Setter
   protected byte[] responseInfo;
 
   /**
-   * Certificates returned by the CMC response
-   *
-   * @param returnCertificates return certificates
-   * @return certificates returned in CMC response
+   * Certificates returned by the CMC response.
    */
   @Getter
   @Setter
   protected List<X509Certificate> returnCertificates;
 
   /**
-   * Status of the CMC response
-   *
-   * @return cmc response status
+   * Status of the CMC response.
    */
   @Getter
   protected CMCResponseStatus cmcResponseStatus;
 
   /**
-   * CMC Request type
-   *
-   * @return cmc request type
+   * CMC Request type.
    */
   @Getter
   protected CMCRequestType cmcRequestType;
