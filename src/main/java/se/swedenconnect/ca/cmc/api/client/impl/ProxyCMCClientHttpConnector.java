@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Agency for Digital Government (DIGG)
+ * Copyright 2024 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,28 @@ package se.swedenconnect.ca.cmc.api.client.impl;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.TrustAllStrategy;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 import se.swedenconnect.ca.cmc.api.client.CMCClientHttpConnector;
 import se.swedenconnect.ca.cmc.api.client.CMCHttpResponseData;
 
@@ -50,7 +53,7 @@ public class ProxyCMCClientHttpConnector implements CMCClientHttpConnector {
   private static final String CMC_MIME_TYPE = "application/pkcs7-mime";
 
   /** The Http client used to send cmc requests */
-  private final HttpClient httpClient;
+  private final CloseableHttpClient httpClient;
 
   /**
    * Constructor for this CMC client http connector
@@ -70,11 +73,10 @@ public class ProxyCMCClientHttpConnector implements CMCClientHttpConnector {
     try {
       request = new HttpPost(requestUrl.toURI());
       request.addHeader("Content-Type", CMC_MIME_TYPE);
-      request.setEntity(new ByteArrayEntity(cmcRequestBytes));
+      request.setEntity(new ByteArrayEntity(cmcRequestBytes, ContentType.create(CMC_MIME_TYPE)));
       request.setConfig(RequestConfig.custom()
-        .setConnectTimeout(connectTimeout)
-        .setConnectionRequestTimeout(connectTimeout)
-        .setSocketTimeout(readTimeout)
+          .setConnectionRequestTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+          .setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS)
         .build());
     }
     catch (URISyntaxException e) {
@@ -82,12 +84,12 @@ public class ProxyCMCClientHttpConnector implements CMCClientHttpConnector {
     }
 
     try {
-      HttpResponse httpResponse = httpClient.execute(request);
+      CloseableHttpResponse httpResponse = httpClient.execute(request);
       byte[] responseData = IOUtils.toByteArray(httpResponse.getEntity().getContent());
       return CMCHttpResponseData.builder()
         .data(responseData)
         .exception(null)
-        .responseCode(httpResponse.getStatusLine().getStatusCode())
+        .responseCode(httpResponse.getCode())
         .build();
     }
     catch (IOException ex) {
@@ -105,22 +107,26 @@ public class ProxyCMCClientHttpConnector implements CMCClientHttpConnector {
    *
    * @return a HttpClient
    */
-  protected HttpClient createHttpClient(final HttpProxyConfiguration cmcClientProxyConfig) {
+  protected CloseableHttpClient createHttpClient(final HttpProxyConfiguration cmcClientProxyConfig) {
     try {
       final HttpClientBuilder builder = HttpClientBuilder.create();
       if (cmcClientProxyConfig != null && cmcClientProxyConfig.getHost() != null) {
         final HttpHost proxy = new HttpHost(cmcClientProxyConfig.getHost(), cmcClientProxyConfig.getPort());
         builder.setProxy(proxy);
         if (cmcClientProxyConfig.getUserName() != null) {
-          CredentialsProvider credentialsPovider = new BasicCredentialsProvider();
-          credentialsPovider.setCredentials(new AuthScope(proxy), new UsernamePasswordCredentials(
-            cmcClientProxyConfig.getUserName(), cmcClientProxyConfig.getPassword()));
-          builder.setDefaultCredentialsProvider(credentialsPovider);
+          final char[] password =
+            cmcClientProxyConfig.getPassword() == null ? null : cmcClientProxyConfig.getPassword().toCharArray();
+          final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+          credentialsProvider.setCredentials(new AuthScope(proxy), new UsernamePasswordCredentials(
+            cmcClientProxyConfig.getUserName(), password));
+          builder.setDefaultCredentialsProvider(credentialsProvider);
         }
       }
-      return builder
-        .setSSLContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
-        .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+      return builder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+          .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+            .setSslContext(new SSLContextBuilder().loadTrustMaterial(null, TrustAllStrategy.INSTANCE).build())
+            .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+            .build()).build())
         .build();
     }
     catch (final Exception e) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Agency for Digital Government (DIGG)
+ * Copyright 2024 Agency for Digital Government (DIGG)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,29 +78,29 @@ public abstract class AbstractCMCClient implements CMCClient {
   /** JSON data object mapper */
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-  /** {@inheritDoc} */
   @Setter
+  /** HTTP connect timeout */
   protected int connectTimeout = 1000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** HTTP read timeout */
   protected int readTimeout = 5000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** Time skew */
   protected int timeSkew = 60000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** Max message age */
   protected int maxAge = 60000;
 
-  /** {@inheritDoc} */
   @Setter
+  /** CA information max message age */
   protected int caInfoMaxAge = 600000;
 
-  /** {@inheritDoc} */
   @Setter
   @Getter
+  /* Connector for CMC requests */
   protected CMCClientHttpConnector cmcClientHttpConnector;
 
   /** Cached CA information */
@@ -358,6 +358,9 @@ public abstract class AbstractCMCClient implements CMCClient {
       throw new CMCClientConnectionException("Http connection to CA failed");
     }
     final byte[] cmcResponseBytes = httpResponseData.getData();
+    if (cmcResponseBytes == null) {
+      throw new CMCMessageException("Failed to retrieve CMC response data");
+    }
     final Date notBefore = new Date(System.currentTimeMillis() - this.maxAge);
     final Date notAfter = new Date(System.currentTimeMillis() + this.timeSkew);
     final Date signingTime = CMCUtils.getSigningTime(cmcResponseBytes);

@@ -1,0 +1,26 @@
+-classpath
+'/Users/stefan/.m2/repository/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar:/Users/stefan/.m2/repository/se/swedenconnect/ca/ca-engine/2.1.0/ca-engine-2.1.0.jar:/Users/stefan/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar:/Users/stefan/.m2/repository/se/swedenconnect/security/credentials-support/1.3.3/credentials-support-1.3.3.jar:/Users/stefan/.m2/repository/org/springframework/spring-core/6.2.0/spring-core-6.2.0.jar:/Users/stefan/.m2/repository/org/springframework/spring-jcl/6.2.0/spring-jcl-6.2.0.jar:/Users/stefan/.m2/repository/org/springframework/spring-beans/6.2.0/spring-beans-6.2.0.jar:/Users/stefan/.m2/repository/org/springframework/spring-context/6.2.0/spring-context-6.2.0.jar:/Users/stefan/.m2/repository/org/springframework/spring-aop/6.2.0/spring-aop-6.2.0.jar:/Users/stefan/.m2/repository/org/springframework/spring-expression/6.2.0/spring-expression-6.2.0.jar:/Users/stefan/.m2/repository/io/micrometer/micrometer-observation/1.14.0/micrometer-observation-1.14.0.jar:/Users/stefan/.m2/repository/io/micrometer/micrometer-commons/1.14.0/micrometer-commons-1.14.0.jar:/Users/stefan/.m2/repository/org/opensaml/opensaml-security-api/5.1.3/opensaml-security-api-5.1.3.jar:/Users/stefan/.m2/repository/org/opensaml/opensaml-core-api/5.1.3/opensaml-core-api-5.1.3.jar:/Users/stefan/.m2/repository/io/dropwizard/metrics/metrics-core/4.2.26/metrics-core-4.2.26.jar:/Users/stefan/.m2/repository/org/opensaml/opensaml-messaging-api/5.1.3/opensaml-messaging-api-5.1.3.jar:/Users/stefan/.m2/repository/net/shibboleth/shib-networking/9.1.3/shib-networking-9.1.3.jar:/Users/stefan/.m2/repository/org/apache/httpcomponents/client5/httpclient5-cache/5.3.1/httpclient5-cache-5.3.1.jar:/Users/stefan/.m2/repository/net/shibboleth/shib-security/9.1.3/shib-security-9.1.3.jar:/Users/stefan/.m2/repository/com/google/guava/guava/33.0.0-jre/guava-33.0.0-jre.jar:/Users/stefan/.m2/repository/com/google/guava/failureaccess/1.0.2/failureaccess-1.0.2.jar:/Users/stefan/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/Users/stefan/.m2/repository/org/checkerframework/checker-qual/3.41.0/checker-qual-3.41.0.jar:/Users/stefan/.m2/repository/com/google/errorprone/error_prone_annotations/2.23.0/error_prone_annotations-2.23.0.jar:/Users/stefan/.m2/repository/com/google/j2objc/j2objc-annotations/2.8/j2objc-annotations-2.8.jar:/Users/stefan/.m2/repository/org/cryptacular/cryptacular/1.2.6/cryptacular-1.2.6.jar:/Users/stefan/.m2/repository/net/shibboleth/shib-support/9.1.3/shib-support-9.1.3.jar:/Users/stefan/.m2/repository/se/swedenconnect/sigval/cert-extensions/1.2.8/cert-extensions-1.2.8.jar:/Users/stefan/.m2/repository/org/bouncycastle/bcpkix-jdk18on/1.79/bcpkix-jdk18on-1.79.jar:/Users/stefan/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.79/bcprov-jdk18on-1.79.jar:/Users/stefan/.m2/repository/org/bouncycastle/bcutil-jdk18on/1.79/bcutil-jdk18on-1.79.jar:/Users/stefan/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.0/jackson-databind-2.18.0.jar:/Users/stefan/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.0/jackson-annotations-2.18.0.jar:/Users/stefan/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.0/jackson-core-2.18.0.jar:/Users/stefan/.m2/repository/commons-io/commons-io/2.18.0/commons-io-2.18.0.jar:/Users/stefan/.m2/repository/org/apache/httpcomponents/client5/httpclient5/5.3.1/httpclient5-5.3.1.jar:/Users/stefan/.m2/repository/org/apache/httpcomponents/core5/httpcore5/5.3.1/httpcore5-5.3.1.jar:/Users/stefan/.m2/repository/org/apache/httpcomponents/core5/httpcore5-h2/5.2.4/httpcore5-h2-5.2.4.jar:/Users/stefan/.m2/repository/commons-codec/commons-codec/1.17.1/commons-codec-1.17.1.jar:/Users/stefan/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/Users/stefan/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar'
+-encoding
+'UTF-8'
+-protected
+-source
+'11'
+-sourcepath
+'/Users/stefan/GitHub/swedenconnect/ca-cmc/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2024 <a href="https://www.swedenconnect.se">Sweden Connect</a>. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/Users/stefan/GitHub/swedenconnect/ca-cmc/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'CMC API - 1.4.0'
+-linkoffline
+'https://docs.oracle.com/en/java/javase/11/docs/api' '/Users/stefan/GitHub/swedenconnect/ca-cmc/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'CMC API - 1.4.0'

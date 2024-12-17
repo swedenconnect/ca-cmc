@@ -1,0 +1,15 @@
+se.swedenconnect.ca.cmc.auth.impl
+se.swedenconnect.ca.cmc.auth
+se.swedenconnect.ca.cmc
+se.swedenconnect.ca.cmc.model.response.impl
+se.swedenconnect.ca.cmc.model.response
+se.swedenconnect.ca.cmc.model.admin.response
+se.swedenconnect.ca.cmc.model.admin
+se.swedenconnect.ca.cmc.model.admin.request
+se.swedenconnect.ca.cmc.model.request.impl
+se.swedenconnect.ca.cmc.model.request
+se.swedenconnect.ca.cmc.api.impl
+se.swedenconnect.ca.cmc.api
+se.swedenconnect.ca.cmc.api.data
+se.swedenconnect.ca.cmc.api.client.impl
+se.swedenconnect.ca.cmc.api.client
