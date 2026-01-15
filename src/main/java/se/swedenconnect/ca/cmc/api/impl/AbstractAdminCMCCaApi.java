@@ -36,6 +36,7 @@ import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
 import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelPolicy;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 
@@ -60,10 +61,12 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
    * @param caService the CA service providing CA service operations
    * @param cmcRequestParser parser for parsing CMC requests
    * @param cmcResponseFactory factory for creating CMC responses
+   * @param policies
    */
   public AbstractAdminCMCCaApi(final CAService caService,
-      final CMCRequestParser cmcRequestParser, final CMCResponseFactory cmcResponseFactory) {
-    super(caService, cmcRequestParser, cmcResponseFactory);
+      final CMCRequestParser cmcRequestParser, final CMCResponseFactory cmcResponseFactory,
+      final List<CertificateModelPolicy> policies) {
+    super(caService, cmcRequestParser, cmcResponseFactory, policies);
   }
 
   /** {@inheritDoc} */

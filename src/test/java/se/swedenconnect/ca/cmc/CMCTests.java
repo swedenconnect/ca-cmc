@@ -403,7 +403,7 @@ public class CMCTests {
       CMCRequestData.subjectMap.get(CMCRequestData.CRMF_USER), subjectKeyPair.getPublic());
     CertificateModel crmfCertificateModel = crmfCertificateModelBuilder.build();
 
-    CMCCaApi cmcCaApi = new DefaultCMCCaApi(ca, cmcRequestParser, cmcResponseFactory);
+    CMCCaApi cmcCaApi = new DefaultCMCCaApi(ca, cmcRequestParser, cmcResponseFactory, new ArrayList<>());
 
     CMCRequest cmcRequest;
     CMCRequestModel requestModel;

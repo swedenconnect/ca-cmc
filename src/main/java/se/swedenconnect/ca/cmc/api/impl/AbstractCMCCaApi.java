@@ -15,12 +15,7 @@
  */
 package se.swedenconnect.ca.cmc.api.impl;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.cmc.BodyPartID;
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
 import org.bouncycastle.asn1.cmc.GetCert;
@@ -28,8 +23,6 @@ import org.bouncycastle.asn1.cmc.PKIData;
 import org.bouncycastle.asn1.cmc.RevokeRequest;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
-
-import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.CMCCaApiException;
@@ -49,9 +42,17 @@ import se.swedenconnect.ca.cmc.model.response.CMCResponseModel;
 import se.swedenconnect.ca.cmc.model.response.impl.CMCAdminResponseModel;
 import se.swedenconnect.ca.cmc.model.response.impl.CMCBasicCMCResponseModel;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
+import se.swedenconnect.ca.engine.ca.issuer.CertificateIssuanceException;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelPolicy;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
 import se.swedenconnect.ca.engine.utils.CAUtils;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Abstract CMC CA API implementation implementing the functions of a CA service serving requests for service received
@@ -72,18 +73,22 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
   /** Factory for constructing CMC responses */
   protected final CMCResponseFactory cmcResponseFactory;
 
+  protected final List<CertificateModelPolicy> certificateModelPolicies;
+
   /**
    * Constructor
    *
    * @param caService the CA service providing CA service operations
    * @param cmcRequestParser parser for parsing CMC requests
    * @param cmcResponseFactory factory for creating CMC responses
+   * @param certificateModelPolicies policies applied to the certificate model before issuing a certificate
    */
   public AbstractCMCCaApi(final CAService caService, final CMCRequestParser cmcRequestParser,
-      final CMCResponseFactory cmcResponseFactory) {
+      final CMCResponseFactory cmcResponseFactory, final List<CertificateModelPolicy> certificateModelPolicies) {
     this.caService = caService;
     this.cmcRequestParser = cmcRequestParser;
     this.cmcResponseFactory = cmcResponseFactory;
+    this.certificateModelPolicies = certificateModelPolicies;
   }
 
   /** {@inheritDoc} */
@@ -197,14 +202,23 @@ public abstract class AbstractCMCCaApi implements CMCCaApi {
   }
 
   /**
-   * This functions generates a certificate request model from the certificate request and control parameters from a CMC
+   * This function generates a certificate request model from the certificate request and check parameters from a CMC
    * request
    *
    * @param cmcRequest CMC Request
    * @return certificate model
    * @throws CMCException any exception caught while attempting to create a certificate model from the CMC request
    */
-  abstract CertificateModel getCertificateModel(CMCRequest cmcRequest) throws CMCException;
+  public CertificateModel getCertificateModel(CMCRequest cmcRequest) throws CMCException, CertificateIssuanceException {
+    CertificateModel certificateModel = extractCertificateModel(cmcRequest);
+    // Apply policies
+    for (CertificateModelPolicy policy : certificateModelPolicies) {
+      policy.applyPolicy(certificateModel);
+    }
+    return certificateModel;
+  }
+
+  protected abstract CertificateModel extractCertificateModel(final CMCRequest cmcRequest)  throws CMCException;
 
   /**
    * Process a request to revoke a certificate
