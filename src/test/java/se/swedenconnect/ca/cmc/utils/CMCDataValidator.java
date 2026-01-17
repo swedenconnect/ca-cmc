@@ -40,8 +40,6 @@ import org.bouncycastle.cert.crmf.CertificateRequestMessage;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSSignedData;
 
-import com.fasterxml.jackson.databind.type.CollectionType;
-
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
@@ -63,6 +61,7 @@ import se.swedenconnect.ca.cmc.model.request.impl.CMCGetCertRequestModel;
 import se.swedenconnect.ca.cmc.model.request.impl.CMCRevokeRequestModel;
 import se.swedenconnect.ca.cmc.model.response.CMCResponseModel;
 import se.swedenconnect.ca.engine.utils.CAUtils;
+import tools.jackson.databind.type.CollectionType;
 
 /**
  * CMC data validator

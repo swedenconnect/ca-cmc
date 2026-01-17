@@ -70,10 +70,6 @@ import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.Store;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
@@ -86,6 +82,9 @@ import se.swedenconnect.ca.engine.ca.attribute.AttributeValueEncoder;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 import se.swedenconnect.ca.engine.utils.CAUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Utility functions for parsing and creating CMC messages.
@@ -418,7 +417,7 @@ public class CMCUtils {
       final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
       return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to parse CA information", e);
     }
   }
@@ -463,7 +462,7 @@ public class CMCUtils {
       final List<String> serials = CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
       return serials.stream().map(s -> new BigInteger(s, 16)).collect(Collectors.toList());
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to parse certificate serial numbers from CMC response", e);
     }
   }
@@ -480,7 +479,7 @@ public class CMCUtils {
     final AdminCMCData adminCMCData = getAdminCMCData(cmcResponse);
     return CMCUtils.OBJECT_MAPPER.readValue(adminCMCData.getData(), new TypeReference<>() {});
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to parse certificates from CMC response", e);
     }
   }

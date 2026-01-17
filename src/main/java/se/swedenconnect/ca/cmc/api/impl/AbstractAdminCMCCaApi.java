@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.CMCRequestParser;
@@ -39,6 +37,7 @@ import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelPolicy;
 import se.swedenconnect.ca.engine.ca.repository.CARepository;
 import se.swedenconnect.ca.engine.ca.repository.CertificateRecord;
+import tools.jackson.core.JacksonException;
 
 /**
  * The default admin implementation of the CMC CA API. This implementation extends the AbstractCMCCaApi which provides
@@ -88,7 +87,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
       try {
         listCertsRequest = CMCUtils.OBJECT_MAPPER.readValue(adminRequest.getData(), ListCerts.class);
       }
-      catch (final JsonProcessingException e) {
+      catch (final JacksonException e) {
         throw new CMCMessageException("Failed to get list certs", e);
       }
       responseInfo = this.getListCertsResponse(listCertsRequest);
@@ -112,7 +111,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
     try {
       return CMCUtils.OBJECT_MAPPER.writeValueAsString(allCertSerialStrings);
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to get all cert serials", e);
     }
   }
@@ -142,7 +141,7 @@ public abstract class AbstractAdminCMCCaApi extends AbstractCMCCaApi {
     try {
       return CMCUtils.OBJECT_MAPPER.writeValueAsString(certificateDataList);
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to create list certs response", e);
     }
   }

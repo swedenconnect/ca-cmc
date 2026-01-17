@@ -38,8 +38,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-
 import lombok.extern.slf4j.Slf4j;
 import se.swedenconnect.ca.cmc.api.CMCCaApi;
 import se.swedenconnect.ca.cmc.api.CMCRequestFactory;
@@ -88,6 +86,7 @@ import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 import se.swedenconnect.ca.engine.utils.CAUtils;
 import se.swedenconnect.sigval.cert.chain.ExtendedCertPathValidatorException;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Test implementations
