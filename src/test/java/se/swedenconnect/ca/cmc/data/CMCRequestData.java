@@ -15,12 +15,6 @@
  */
 package se.swedenconnect.ca.cmc.data;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.admin.AdminRequestType;
 import se.swedenconnect.ca.cmc.model.admin.request.ListCerts;
@@ -30,6 +24,10 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
 import se.swedenconnect.ca.engine.ca.models.cert.CertNameModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.ExplicitCertNameModel;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * CMC Request data
@@ -52,67 +50,57 @@ public class CMCRequestData {
   public static Map<String, CertNameModel<?>> subjectMap;
   public static Map<String, AdminCMCData> adminRequestMap;
 
-
   static {
     subjectMap = new HashMap<>();
     subjectMap.put(USER1, new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User One").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678901").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("One").build()
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User One").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678901").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("One").build()
     )));
     subjectMap.put(USER2, new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User Two").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678902").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Two").build()
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User Two").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678902").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Two").build()
     )));
     subjectMap.put(USER3, new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User Three").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Three").build()
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("Test User Three").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("Test User").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Three").build()
     )));
     subjectMap.put(PKCS10_USER, new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("PKCS10 User Four").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("PKCS10 User").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Four").build()
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("PKCS10 User Four").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("PKCS10 User").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Four").build()
     )));
     subjectMap.put(CRMF_USER, new ExplicitCertNameModel(Arrays.asList(
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("CRMF User Five").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("CRMF User").build(),
-      AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Five").build()
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.C).value("SE").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.CN).value("CRMF User Five").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SERIALNUMBER).value("12345678903").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.GIVENNAME).value("CRMF User").build(),
+        AttributeTypeAndValueModel.builder().attributeType(CertAttributes.SURNAME).value("Five").build()
     )));
 
     adminRequestMap = new HashMap<>();
-    try {
-      adminRequestMap.put(LIST_CERTS, AdminCMCData.builder()
-          .adminRequestType(AdminRequestType.listCerts)
-          .data(TestUtils.OBJECT_MAPPER.writeValueAsString(ListCerts.builder()
-              .pageIndex(0)
-              .pageSize(10)
-              .notRevoked(false)
-              .sortBy(SortBy.issueDate)
+    adminRequestMap.put(LIST_CERTS, AdminCMCData.builder()
+        .adminRequestType(AdminRequestType.listCerts)
+        .data(TestUtils.MAPPER.writeValueAsString(ListCerts.builder()
+            .pageIndex(0)
+            .pageSize(10)
+            .notRevoked(false)
+            .sortBy(SortBy.issueDate)
             .build()))
         .build());
-      adminRequestMap.put(CA_INFO, AdminCMCData.builder().adminRequestType(AdminRequestType.caInfo).build());
-      adminRequestMap.put(STATIC_CA_INFO, AdminCMCData.builder().adminRequestType(AdminRequestType.staticCaInfo).build());
-      adminRequestMap.put(LIST_CERT_SERIALS, AdminCMCData.builder().adminRequestType(AdminRequestType.allCertSerials).build());
-
-    }
-    catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
-
+    adminRequestMap.put(CA_INFO, AdminCMCData.builder().adminRequestType(AdminRequestType.caInfo).build());
+    adminRequestMap.put(STATIC_CA_INFO, AdminCMCData.builder().adminRequestType(AdminRequestType.staticCaInfo).build());
+    adminRequestMap.put(LIST_CERT_SERIALS,
+        AdminCMCData.builder().adminRequestType(AdminRequestType.allCertSerials).build());
   }
-
-
-
 }
