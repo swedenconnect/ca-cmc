@@ -15,13 +15,13 @@
  */
 package se.swedenconnect.ca.cmc.model.request.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import lombok.Getter;
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.cmc.model.admin.AdminCMCData;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
+import tools.jackson.core.JacksonException;
 
 /**
  * CMC Revocation request model.
@@ -53,7 +53,7 @@ public class CMCAdminRequestModel extends AbstractCMCRequestModel {
     try {
       return CMCUtils.OBJECT_MAPPER.writeValueAsBytes(adminCMCData);
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Unable to convert admin request data to JSON", e);
     }
   }

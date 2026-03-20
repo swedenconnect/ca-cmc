@@ -19,10 +19,6 @@ import java.util.List;
 
 import org.bouncycastle.asn1.cmc.CMCObjectIdentifiers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.data.CMCControlObject;
 import se.swedenconnect.ca.cmc.api.data.CMCResponse;
@@ -33,6 +29,9 @@ import se.swedenconnect.ca.cmc.model.admin.response.CAInformation;
 import se.swedenconnect.ca.cmc.model.admin.response.CertificateData;
 import se.swedenconnect.ca.cmc.model.admin.response.StaticCAInformation;
 import se.swedenconnect.ca.cmc.model.request.CMCRequestType;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Providing a set of static CMC response data extraction functions.
@@ -80,7 +79,7 @@ public class CMCResponseExtract {
           });
       return certificateDataList;
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to extract certificate data", e);
     }
   }
@@ -101,7 +100,7 @@ public class CMCResponseExtract {
       final CAInformation caInformation = OBJECT_MAPPER.readValue(adminCMCData.getData(), CAInformation.class);
       return caInformation;
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to extract CA information from CMC response", e);
     }
   }
@@ -124,7 +123,7 @@ public class CMCResponseExtract {
           OBJECT_MAPPER.readValue(adminCMCData.getData(), StaticCAInformation.class);
       return caInformation;
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to extract static CA information from CMC response", e);
     }
   }

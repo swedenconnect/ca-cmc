@@ -34,9 +34,6 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.Getter;
 import lombok.Setter;
 import se.swedenconnect.ca.cmc.CMCException;
@@ -66,6 +63,8 @@ import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
 import se.swedenconnect.ca.engine.ca.repository.SortBy;
 import se.swedenconnect.ca.engine.configuration.CAAlgorithmRegistry;
 import se.swedenconnect.security.credential.PkiCredential;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Abstract implementation of a CMC Client used to execute CA management operations via CMC on a remote CA
@@ -266,7 +265,7 @@ public abstract class AbstractCMCClient implements CMCClient {
           .build()));
       return this.getCMCResponse(cmcRequest);
     }
-    catch (final JsonProcessingException e) {
+    catch (final JacksonException e) {
       throw new CMCMessageException("Failed to write certificates in JSON", e);
     }
   }

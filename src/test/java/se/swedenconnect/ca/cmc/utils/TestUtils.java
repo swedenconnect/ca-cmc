@@ -54,14 +54,13 @@ import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import se.swedenconnect.ca.cmc.ca.TestCA;
 import se.swedenconnect.ca.cmc.ca.TestCAHolder;
 import se.swedenconnect.ca.cmc.ca.TestServices;
 import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Utility functions for test
@@ -71,7 +70,7 @@ import se.swedenconnect.ca.engine.ca.models.cert.AttributeTypeAndValueModel;
  */
 public class TestUtils {
 
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  public static final JsonMapper MAPPER = new JsonMapper();
   public static final String ASCII_STR_REGEX = "^([\\w]|[0-9]|[\\s]){1,}$";
 
   public static X509Certificate getCertificate(byte[] certBytes) throws CertificateException, IOException {

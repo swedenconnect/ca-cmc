@@ -15,14 +15,6 @@
  */
 package se.swedenconnect.ca.cmc.api.impl;
 
-import java.io.IOException;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -44,7 +36,6 @@ import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCSException;
-
 import se.swedenconnect.ca.cmc.CMCException;
 import se.swedenconnect.ca.cmc.api.CMCMessageException;
 import se.swedenconnect.ca.cmc.api.CMCRequestParser;
@@ -54,9 +45,17 @@ import se.swedenconnect.ca.cmc.api.data.CMCRequest;
 import se.swedenconnect.ca.cmc.auth.CMCUtils;
 import se.swedenconnect.ca.engine.ca.issuer.CAService;
 import se.swedenconnect.ca.engine.ca.models.cert.CertificateModel;
+import se.swedenconnect.ca.engine.ca.models.cert.CertificateModelPolicy;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.ExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.extension.impl.GenericExtensionModel;
 import se.swedenconnect.ca.engine.ca.models.cert.impl.EncodedCertNameModel;
+
+import java.io.IOException;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Default CMC API implementation. This API implementation extends the {@link AbstractAdminCMCCaApi} providing default
@@ -79,13 +78,14 @@ public class DefaultCMCCaApi extends AbstractAdminCMCCaApi {
    * @param cmcResponseFactory factory for creating CMC responses
    */
   public DefaultCMCCaApi(final CAService caService,
-      final CMCRequestParser cmcRequestParser, final CMCResponseFactory cmcResponseFactory) {
-    super(caService, cmcRequestParser, cmcResponseFactory);
+      final CMCRequestParser cmcRequestParser, final CMCResponseFactory cmcResponseFactory,
+      List<CertificateModelPolicy> policies) {
+    super(caService, cmcRequestParser, cmcResponseFactory, policies);
   }
 
   /** {@inheritDoc} */
   @Override
-  CertificateModel getCertificateModel(final CMCRequest cmcRequest) throws CMCException {
+  protected CertificateModel extractCertificateModel(final CMCRequest cmcRequest) throws CMCException {
     final CertificationRequest certificationRequest = cmcRequest.getCertificationRequest();
     final CertificateRequestMessage certificateRequestMessage = cmcRequest.getCertificateRequestMessage();
 
@@ -108,9 +108,9 @@ public class DefaultCMCCaApi extends AbstractAdminCMCCaApi {
     if (lraPopWitness == null) {
       throw new CMCMessageException("Certificate request message format requests must hav LRA POP Witness set");
     }
-    final List<Long> lraPopIdList = Arrays.asList(lraPopWitness.getBodyIds()).stream()
+    final List<Long> lraPopIdList = Arrays.stream(lraPopWitness.getBodyIds())
         .map(BodyPartID::getID)
-        .collect(Collectors.toList());
+        .toList();
     if (!lraPopIdList.contains(certReqBodyPartId.getID())) {
       throw new CMCMessageException("No matching LRA POP Witness ID in CRMF request");
     }

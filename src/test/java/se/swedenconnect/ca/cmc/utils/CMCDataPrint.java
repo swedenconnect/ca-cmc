@@ -170,12 +170,12 @@ public class CMCDataPrint {
             b.append("    value: ").append(valueStr).append("\n");
             break;
           case admin:
-            AdminCMCData adminRequestData = TestUtils.OBJECT_MAPPER.readValue(octets, AdminCMCData.class);
+            AdminCMCData adminRequestData = TestUtils.MAPPER.readValue(octets, AdminCMCData.class);
             b.append("    admin-type: ").append(adminRequestData.getAdminRequestType()).append("\n");
             String requestData = adminRequestData.getData();
             if (requestData != null) {
-              valueStr = TestUtils.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
-                  TestUtils.OBJECT_MAPPER.readValue(requestData, Object.class));
+              valueStr = TestUtils.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
+                  TestUtils.MAPPER.readValue(requestData, Object.class));
               b.append("    request-data:\n").append(valueStr.replaceAll("(?m)^", "      ")).append("\n");
             }
             break;
@@ -227,8 +227,8 @@ public class CMCDataPrint {
             b.append("    admin-type: ").append(adminCMCData.getAdminRequestType()).append("\n");
             String responseData = adminCMCData.getData();
             if (responseData != null) {
-              valueStr = TestUtils.OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
-                  TestUtils.OBJECT_MAPPER.readValue(responseData, Object.class));
+              valueStr = TestUtils.MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(
+                  TestUtils.MAPPER.readValue(responseData, Object.class));
               b.append("    response-data:\n").append(valueStr.replaceAll("(?m)^", "      ")).append("\n");
             }
           }
