@@ -18,7 +18,7 @@
     <ca.engine.version>2.2.1</ca.engine.version>
     <sigval.version>3.0.0</sigval.version>
     <slf4j.version>2.0.18</slf4j.version>
-    <bouncy-castle.version>1.84</bouncy-castle.version>
+    <bouncy-castle.version>1.85</bouncy-castle.version>
     <spring.version>7.0.8</spring.version>
   </properties>
 
