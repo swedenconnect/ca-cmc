@@ -2,7 +2,7 @@
 
 # CMC API for Certification Authority integration
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Maven Central](https://img.shields.io/maven-central/v/se.swedenconnect.ca/cmc.svg)](https://central.sonatype.com/artifact/se.swedenconnect.ca/cmc)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Core functions for managing a remote CA via CMC
 
@@ -15,10 +15,14 @@ Add this maven dependency to your project
 ```
 <dependency>
     <groupId>se.swedenconnect.ca</groupId>
-    <artifactId>cmc/artifactId>
+    <artifactId>cmc</artifactId>
     <version>${ca-cmc.version}</version>
 </dependency>
 ```
+
+Versions up to 2.0.1 are on Maven Central. Later versions are published only to the GitHub Packages Maven registry of this repository. Using them needs a repository entry in your POM and a GitHub token, see [Using the Artifacts from GitHub Packages](docs/github-packages.md).
+
+How to make a release is described in [Releasing](docs/release.md).
 
 ##### API documentation
 
